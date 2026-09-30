@@ -22,6 +22,8 @@
 		,{"path":"pages/grammar/quiz","style":{"navigationStyle":"custom","navigationBarTitleText":"语法练习"}}
 		,{"path":"pages/puzzle/play","style":{"navigationStyle":"custom","navigationBarTitleText":"拼句练习"}}
 		,{"path":"pages/recent/index","style":{"navigationStyle":"custom","navigationBarTitleText":"最近学习"}}
+		,{"path":"pages/reading/series","style":{"navigationStyle":"custom","navigationBarTitleText":"小说目录"}}
+		,{"path":"pages/reading/chapter","style":{"navigationStyle":"custom","navigationBarTitleText":"章节阅读"}}
 	],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
