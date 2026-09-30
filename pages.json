@@ -3,9 +3,23 @@
 		{
 			"path": "pages/index/index",
 			"style": {
-				"navigationBarTitleText": "uni-app"
+				"navigationStyle": "custom",
+				"navigationBarTitleText": "读句 English"
 			}
-		}
+		},
+		{"path":"pages/reading/index","style":{"navigationStyle":"custom","navigationBarTitleText":"精读"}},
+		{"path":"pages/vocab/index","style":{"navigationStyle":"custom","navigationBarTitleText":"单词详解"}},
+		{"path":"pages/grammar/index","style":{"navigationStyle":"custom","navigationBarTitleText":"语法学习"}},
+		{"path":"pages/puzzle/index","style":{"navigationStyle":"custom","navigationBarTitleText":"拼句练习"}}
+		,{"path":"pages/reading/article","style":{"navigationStyle":"custom","navigationBarTitleText":"文章精读"}}
+		,{"path":"pages/reading/questions","style":{"navigationStyle":"custom","navigationBarTitleText":"阅读理解"}}
+		,{"path":"pages/vocab/list","style":{"navigationStyle":"custom","navigationBarTitleText":"全部词汇"}}
+		,{"path":"pages/vocab/detail","style":{"navigationStyle":"custom","navigationBarTitleText":"单词详解"}}
+		,{"path":"pages/vocab/spell","style":{"navigationStyle":"custom","navigationBarTitleText":"拼写练习"}}
+		,{"path":"pages/grammar/detail","style":{"navigationStyle":"custom","navigationBarTitleText":"语法详解"}}
+		,{"path":"pages/grammar/quiz","style":{"navigationStyle":"custom","navigationBarTitleText":"语法练习"}}
+		,{"path":"pages/puzzle/play","style":{"navigationStyle":"custom","navigationBarTitleText":"拼句练习"}}
+		,{"path":"pages/recent/index","style":{"navigationStyle":"custom","navigationBarTitleText":"最近学习"}}
 	],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
