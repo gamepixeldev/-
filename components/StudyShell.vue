@@ -26,10 +26,11 @@
           <view class="module-card module-green" @tap="go('grammar')"><text class="module-icon">文</text><text class="module-name">语法学习</text><text class="module-desc">知识讲解 · 随堂练习</text><text class="module-arrow">›</text></view>
           <view class="module-card module-purple" @tap="go('puzzle')"><text class="module-icon">拼</text><text class="module-name">拼句</text><text class="module-desc">理解语意 · 排列句子</text><text class="module-arrow">›</text></view>
         </view>
-        <view class="section-head"><text class="section-title">继续上次阅读</text><text class="inline-link" @tap="go('reading')">全部文章　›</text></view>
-        <view class="card recent-card" @tap="openArticle(0)"><view class="art-thumb art-blue"><text>☂</text></view><view class="recent-copy"><text class="card-title">The Blue Umbrella</text><text class="card-sub">蓝色雨伞 · 一段关于善意的故事</text><view class="tag-row"><text class="tag">初级</text><text class="tag">6 分钟</text></view></view><text class="chevron">›</text></view>
-        <view class="section-head"><text class="section-title">最近学习</text><text class="section-note">随时回到学过的内容</text></view>
-        <view class="card recent-line" @tap="openWord(0)"><view class="mini-icon mint">Aa</view><view class="recent-copy"><text class="card-title">kindness</text><text class="card-sub">n. 善意；友好</text></view><text class="chevron">›</text></view>
+        <view class="section-head"><text class="section-title">今天读点什么</text><text class="inline-link" @tap="go('reading')">全部文章　›</text></view>
+        <view class="card recent-card" @tap="openArticle(0)"><view class="art-thumb art-blue"><text>{{ articles[0].icon }}</text></view><view class="recent-copy"><text class="card-title">{{ articles[0].title }}</text><text class="card-sub">{{ articles[0].translation }} · 原创短篇</text><view class="tag-row"><text class="tag">{{ articles[0].level }}</text><text class="tag">约 {{ articles[0].minutes }} 分钟</text></view></view><text class="chevron">›</text></view>
+        <view class="section-head"><text class="section-title">最近学习</text><text class="inline-link" @tap="go('recent')">查看全部　›</text></view>
+        <view v-if="recentItems.length" v-for="(item,i) in recentItems.slice(0,3)" :key="item.key" class="card recent-line" @tap="openRecent(item)"><view class="mini-icon" :class="recentTone(item.type)">{{ recentIcon(item.type) }}</view><view class="recent-copy"><text class="card-title">{{ item.title }}</text><text class="card-sub">{{ item.subtitle }}</text></view><text class="chevron">›</text></view>
+        <view v-else class="card recent-empty"><text class="card-title">你的学习记录会显示在这里</text><text class="card-sub">读一篇短文，或打开任意词条开始学习。</text></view>
       </view>
 
       <view v-else-if="view === 'reading'" class="page reading-page">
@@ -95,7 +96,7 @@
       </view>
       <view v-else-if="view === 'puzzleplay'" class="page puzzleplay-page"><view class="progress-row"><view class="progress-track"><view class="progress-fill" :style="{width: ((puzzleIndex + 1) / currentPuzzleSet.items.length * 100) + '%'}"></view></view><text class="muted">{{ puzzleIndex + 1 }} / {{ currentPuzzleSet.items.length }}</text></view><text class="question-type">{{ currentPuzzleSet.title }}</text><text class="puzzle-cn">{{ puzzle.cn }}</text><view class="placed-words"><text v-if="!puzzleWords.length" class="muted">点选下方单词，组成正确句子</text><view v-for="(word,i) in puzzleWords" :key="i" class="word-token chosen" @tap="unpickPuzzle(i)">{{ word }}</view></view><view class="word-bank"><view v-for="(word,i) in shuffledPuzzle" :key="i" class="word-token" :class="{used: usedPuzzle.includes(i)}" @tap="pickPuzzle(i)">{{ word }}</view></view><view v-if="puzzleAnswered" class="explanation"><text class="explanation-title">{{ puzzleCorrect ? '语序正确！' : '参考答案' }}</text><text class="explanation-text">{{ puzzle.answer }}</text></view><view class="bottom-action"><button class="primary-button" @tap="puzzleAction">{{ puzzleAnswered ? (puzzleIndex < currentPuzzleSet.items.length - 1 ? '下一句' : '完成练习') : '检查答案' }}</button></view></view>
 
-      <view v-else-if="view === 'recent'" class="page"><view class="intro-block"><text class="eyebrow">YOUR LEARNING</text><text class="large-title">最近学习</text><text class="muted">最近查看的词汇，可随时回来复习</text></view><view v-for="(word,i) in allWords.slice(0,5)" :key="word.word" class="card word-row" @tap="openWord(i)"><view><text class="word-main">{{ word.word }}</text><text class="word-sub">{{ word.pos }}　{{ word.meaning }}</text></view><text class="chevron">›</text></view></view>
+      <view v-else-if="view === 'recent'" class="page"><view class="intro-block"><text class="eyebrow">YOUR LEARNING</text><text class="large-title">最近学习</text><text class="muted">你最近打开过的文章、词汇、语法与拼句</text></view><view v-if="recentItems.length"><view v-for="item in recentItems" :key="item.key" class="card recent-line" @tap="openRecent(item)"><view class="mini-icon" :class="recentTone(item.type)">{{ recentIcon(item.type) }}</view><view class="recent-copy"><text class="card-title">{{ item.title }}</text><text class="card-sub">{{ item.subtitle }}</text></view><text class="chevron">›</text></view><text class="clear-history" @tap="clearRecent">清空记录</text></view><view v-else class="card recent-empty"><text class="card-title">还没有学习记录</text><text class="card-sub">从首页任选一个模块开始，内容会自动保存在这里。</text><view class="empty-modules"><text @tap="go('reading')">精读</text><text @tap="go('vocab')">单词</text><text @tap="go('grammar')">语法</text><text @tap="go('puzzle')">拼句</text></view></view></view>
     </scroll-view>
     <view v-if="!immersive && ['home','reading','vocab','grammar','puzzle'].includes(view)" class="tabbar"><view v-for="tab in tabs" :key="tab.id" class="tab-item" :class="{active: activeTab === tab.id}" @tap="go(tab.id)"><text class="tab-icon">{{ tab.icon }}</text><text>{{ tab.label }}</text></view></view>
   </view>
@@ -103,7 +104,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { articles, words, grammar, puzzleSets as puzzleSetsData } from '../pages/index/learning-data.js'
 
 const props = defineProps({ initialView: { type: String, default: 'home' }, initialIndex: { type: Number, default: 0 }, returnView: { type: String, default: 'vocab' } })
@@ -138,6 +139,7 @@ const puzzleCorrect = ref(false)
 const selectedSentence = ref('')
 const toastMessage = ref('')
 const tabs = [{id:'home',label:'首页',icon:'⌂'},{id:'reading',label:'精读',icon:'▤'},{id:'grammar',label:'语法',icon:'文'},{id:'vocab',label:'单词',icon:'Aa'},{id:'puzzle',label:'拼句',icon:'拼'}]
+const recentItems = ref(loadRecentItems())
 const allWords = words
 const grammarItems = grammar
 const storyWordCounts = [148, 126]
@@ -159,12 +161,19 @@ const currentPuzzleSet = computed(() => puzzleSets[puzzleSetIndex.value] || puzz
 const puzzle = computed(() => currentPuzzleSet.value.items[puzzleIndex.value] || currentPuzzleSet.value.items[0])
 
 function toast(message) { toastMessage.value = message; setTimeout(() => { if (toastMessage.value === message) toastMessage.value = '' }, 1800) }
+function loadRecentItems() { try { return uni.getStorageSync('readEnglishRecent') || [] } catch (_) { return [] } }
+function syncRecentItems() { recentItems.value = loadRecentItems() }
+function trackRecent(type, index, title, subtitle) { const item = {key:type + ':' + index, type, index, title, subtitle, time:Date.now()}; const next = [item, ...recentItems.value.filter(entry => entry.key !== item.key)].slice(0,12); recentItems.value = next; try { uni.setStorageSync('readEnglishRecent', next); uni.$emit('readEnglishRecentUpdate') } catch (_) {} }
+function recentIcon(type) { return ({article:'▤',word:'Aa',grammar:'文',puzzle:'拼'})[type] || '•' }
+function recentTone(type) { return ({article:'blue',word:'mint',grammar:'lilac',puzzle:'gold'})[type] || 'blue' }
+function openRecent(item) { if (item.type === 'article') openArticle(item.index); else if (item.type === 'word') openWord(item.index); else if (item.type === 'grammar') openGrammar(item.index); else if (item.type === 'puzzle') startPuzzle(item.index) }
+function clearRecent() { recentItems.value = []; try { uni.removeStorageSync('readEnglishRecent'); uni.$emit('readEnglishRecentUpdate') } catch (_) {} }
 function formatEnglish(text) { return text.replace(/([’'])(?=[a-z])/gi, '$1\u2060') }
 function go(next) { const routes = {home:'/pages/index/index',reading:'/pages/reading/index',article:'/pages/reading/article',questions:'/pages/reading/questions',vocab:'/pages/vocab/index',wordlist:'/pages/vocab/list',worddetail:'/pages/vocab/detail',spell:'/pages/vocab/spell',grammar:'/pages/grammar/index',gramlist:'/pages/grammar/index',gramdetail:'/pages/grammar/detail',gramquiz:'/pages/grammar/quiz',puzzle:'/pages/puzzle/index',puzzleplay:'/pages/puzzle/play',recent:'/pages/recent/index'}; if (routes[next] && next !== props.initialView) { const item = next === 'article' || next === 'questions' ? articleIndex.value : next === 'worddetail' || next === 'spell' ? wordIndex.value : next === 'gramdetail' || next === 'gramquiz' ? grammarIndex.value : next === 'puzzleplay' ? puzzleSetIndex.value : 0; const extra = next === 'spell' ? '&from=' + spellReturn.value : ''; uni.navigateTo({url: routes[next] + '?item=' + item + extra}); return }; if (next === view.value) return; viewStack.value.push(view.value); view.value = next; if (['home','reading','vocab','grammar','puzzle'].includes(next)) activeTab.value = next; scrollTop.value = 0 }
 function back() { if (viewStack.value.length) { view.value = viewStack.value.pop(); if (['home','reading','vocab','grammar','puzzle'].includes(view.value)) activeTab.value = view.value } else if (props.initialView !== 'home') { uni.navigateBack({ fail: () => uni.redirectTo({url:'/pages/index/index'}) }); return } else { view.value = 'home'; activeTab.value = 'home' }; scrollTop.value = 0 }
-function openArticle(i) { articleIndex.value = i; questionIndex.value = 0; selectedSentence.value = ''; go('article') }
-function openWord(i) { wordIndex.value = i; go('worddetail') }
-function openGrammar(i) { grammarIndex.value = i; go('gramdetail') }
+function openArticle(i) { articleIndex.value = i; questionIndex.value = 0; selectedSentence.value = ''; const article = articles[i] || articles[0]; trackRecent('article', i, article.title, article.translation + ' · 精读文章'); go('article') }
+function openWord(i) { wordIndex.value = i; const word = allWords[i] || allWords[0]; trackRecent('word', i, word.word, word.pos + ' ' + word.meaning); go('worddetail') }
+function openGrammar(i) { grammarIndex.value = i; const item = grammarItems[i] || grammarItems[0]; trackRecent('grammar', i, item.title, item.level + ' · 语法专题'); go('gramdetail') }
 function startQuestions() { questionIndex.value = 0; selectedOption.value = -1; answered.value = false; fillAnswer.value = ''; go('questions') }
 function chooseOption(i) { if (!answered.value) selectedOption.value = i }
 function optionState(i) { if (!answered.value) return selectedOption.value === i ? 'chosen-option' : ''; if (i === currentQuestion.value.answer) return 'correct-option'; if (i === selectedOption.value) return 'wrong-option'; return '' }
@@ -180,11 +189,13 @@ function startGrammarQuiz() { selectedOption.value = -1; grammarAnswered.value =
 function grammarQuizAction() { if (!grammarAnswered.value) { if (selectedOption.value < 0) { toast('先选择一个答案'); return }; grammarCorrect.value = selectedOption.value === currentGrammar.value.quiz.answer; grammarAnswered.value = true } else { back() } }
 function pickPuzzle(i) { if (usedPuzzle.value.includes(i) || puzzleAnswered.value) return; puzzleWords.value.push(shuffledPuzzle.value[i]); usedPuzzle.value.push(i) }
 function unpickPuzzle(i) { if (puzzleAnswered.value) return; const word = puzzleWords.value[i]; puzzleWords.value.splice(i,1); const bankIndex = usedPuzzle.value.find(j => shuffledPuzzle.value[j] === word); if (bankIndex !== undefined) usedPuzzle.value = usedPuzzle.value.filter(j => j !== bankIndex) }
-function startPuzzle(i) { puzzleSetIndex.value = i % puzzleSets.length; puzzleIndex.value = 0; initPuzzle(); go('puzzleplay') }
+function startPuzzle(i) { puzzleSetIndex.value = i % puzzleSets.length; puzzleIndex.value = 0; const set = puzzleSets[puzzleSetIndex.value]; trackRecent('puzzle', puzzleSetIndex.value, set.title, set.subtitle + ' · 拼句练习'); initPuzzle(); go('puzzleplay') }
 function puzzleAction() { if (puzzleAnswered.value) { if (puzzleIndex.value < currentPuzzleSet.value.items.length - 1) { puzzleIndex.value++; initPuzzle() } else { toast('这组练习完成'); back() }; return }; if (!puzzleWords.value.length) { toast('先点选下方单词'); return }; puzzleCorrect.value = puzzleWords.value.join(' ') === puzzle.value.answer; puzzleAnswered.value = true }
 function initPuzzle() { shuffledPuzzle.value = puzzle.value.answer.split(' ').sort(() => Math.random() - .5); puzzleWords.value = []; usedPuzzle.value = []; puzzleAnswered.value = false }
 if (props.initialView === 'spell') setupSpell()
 else initPuzzle()
+onMounted(() => uni.$on('readEnglishRecentUpdate', syncRecentItems))
+onUnmounted(() => uni.$off('readEnglishRecentUpdate', syncRecentItems))
 </script>
 
 <style>
@@ -267,5 +278,8 @@ page{height:100%;background:#f4f7fc;color:#303d53;font-family:-apple-system,Blin
 .arr{flex:none;margin-left:auto;color:#aab5c4;font-size:34rpx;line-height:1}
 .puzzle-thumb{background:#fff0d7;color:#bc8a3e;font-size:31rpx}
 .puzzleplay-page{padding-top:32rpx}
+.recent-empty{margin:0 30rpx 18rpx;display:flex;flex-direction:column;gap:10rpx;padding:26rpx}
+.clear-history{display:block;text-align:center;padding:24rpx;color:#8794a6;font-size:22rpx}
+.empty-modules{display:flex;justify-content:space-between;margin-top:18rpx;color:#3978ef;font-size:23rpx}
 @media (max-width: 360px){.hero-title{font-size:39rpx}.module-desc{font-size:17rpx}.article-art{width:136rpx;height:136rpx}}
 </style>
