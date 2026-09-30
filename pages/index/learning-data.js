@@ -36,3 +36,21 @@ export const puzzleSets = [
     {cn:'一个小小的帮助也能让人开心。',answer:'A little help can make someone feel happy.'}
   ]}
 ]
+
+// Word and grammar lessons own their content. An admin/API can replace contentSource
+// with { type: 'richtext', html } or { type: 'officialAccount', url, title, summary }.
+const escapeContentHTML = value => String(value || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+const escapeEnglishHTML = value => escapeContentHTML(value).replace(/([’'])(?=[a-z])/gi, '$1\u2060')
+
+export function getWordContentSource(word) {
+  if (word.contentSource) return word.contentSource
+  const examples = (word.examples || []).map(example => `<p><strong>${escapeEnglishHTML(example.en)}</strong><br/>${escapeContentHTML(example.cn)}</p>`).join('')
+  const forms = word.forms ? `<h3>词形变化</h3><p>${escapeContentHTML(word.forms)}</p>` : ''
+  return {type:'richtext',html:`<h3>词义辨析</h3><p>${escapeContentHTML(word.note)}</p>${forms}<h3>例句</h3>${examples}<h3>记忆一下</h3><p>${escapeContentHTML(word.memory)}</p>`}
+}
+
+export function getGrammarContentSource(item) {
+  if (item.contentSource) return item.contentSource
+  const examples = (item.examples || []).map(example => `<p><strong>${escapeEnglishHTML(example.en)}</strong><br/>${escapeContentHTML(example.cn)}</p>`).join('')
+  return {type:'richtext',html:`<h3>什么时候这样用？</h3><p>${escapeContentHTML(item.explanation)}</p><h3>结构拆解</h3><p><strong>${escapeContentHTML(item.pattern)}</strong></p><h3>例句观察</h3>${examples}`}
+}

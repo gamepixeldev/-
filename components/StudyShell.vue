@@ -72,9 +72,7 @@
       <view v-else-if="view === 'wordlist'" class="page"><view class="intro-block"><text class="eyebrow">WORD LIST</text><text class="large-title">精选词汇</text><text class="muted">独立词库，可按需浏览词条</text></view><view class="word-list"><view v-for="(word,i) in allWords" :key="word.word" class="card word-row" @tap="openWord(i)"><view><text class="word-main">{{ word.word }}</text><text class="word-sub">{{ word.pos }}　{{ word.meaning }}</text></view><text class="chevron">›</text></view></view><view class="bottom-action"><button class="primary-button" @tap="beginSpelling('wordlist')">开始拼写练习</button></view></view>
 
       <view v-else-if="view === 'worddetail'" class="page word-detail-page"><view class="word-hero"><text class="eyebrow">WORD {{ wordIndex + 1 }} / {{ allWords.length }}</text><text class="word-display">{{ currentWord.word }}</text><view class="pronounce-row"><text class="pronunciation">{{ currentWord.ipa }}</text><text class="sound-button" @tap="toast('音频播放将在后续版本接入')">▶　听发音</text></view><view class="word-badges"><text class="tag">{{ currentWord.pos }}</text><text class="tag">{{ currentWord.frequency }}</text></view><text class="meaning">{{ currentWord.meaning }}</text></view>
-        <view class="card detail-card"><text class="detail-label">词义辨析</text><text class="detail-copy">{{ currentWord.note }}</text><view v-if="currentWord.forms" class="form-line"><text class="detail-label">词形变化</text><text class="detail-copy">{{ currentWord.forms }}</text></view></view>
-        <view class="section-head"><text class="section-title">例句</text><text class="section-note">来自阅读内容与生活表达</text></view><view v-for="(example,i) in currentWord.examples" :key="i" class="card example-card"><text class="example-en">{{ formatEnglish(example.en) }}</text><text class="example-cn">{{ example.cn }}</text></view>
-        <view class="section-head"><text class="section-title">记忆一下</text></view><view class="card detail-card"><text class="detail-copy">{{ currentWord.memory }}</text></view>
+        <view v-if="currentWordContent.type === 'officialAccount'" class="card source-card"><text class="detail-label">公众号文章</text><text class="card-title">{{ currentWordContent.title || '查看关联的公众号文章' }}</text><text class="card-sub">{{ currentWordContent.summary || '词汇详解内容来自关联的公众号文章。' }}</text><button class="source-button" @tap="openOfficialSource(currentWordContent)">阅读公众号原文</button></view><rich-text v-else class="rich-content card" :nodes="currentWordContent.html" />
         <view class="bottom-action dual-action"><button class="secondary-button" @tap="beginSpelling('worddetail')">拼写练习</button><button class="primary-button" @tap="nextWordDetail">下一个单词</button></view></view>
 
       <view v-else-if="view === 'spell'" class="page spell-page"><view class="progress-row"><view class="progress-track"><view class="progress-fill" :style="{width: ((spellIndex + 1) / spellWords.length * 100) + '%'}"></view></view></view><view class="spell-prompt"><text class="eyebrow">根据中文释义拼出单词</text><text class="spell-meaning">{{ spellWords[spellIndex].pos }}　{{ spellWords[spellIndex].meaning }}</text><text class="hint-link" @tap="toast('首字母提示：' + spellWords[spellIndex].word[0])">需要提示？</text></view><view class="card spelling-card"><view class="letter-slots"><view v-for="(letter,i) in spellSlots" :key="i" class="letter-slot" @tap="removeLetter(i)">{{ letter || '' }}</view></view><view class="letter-bank"><button v-for="(letter,i) in letterBank" :key="i" class="letter-key" :disabled="usedLetters.includes(i) || answered" @tap="addLetter(i)">{{ letter }}</button></view><view v-if="answered" class="explanation"><text class="explanation-title">{{ isCorrect ? '拼写正确！' : '再看一眼正确拼法' }}</text><text class="explanation-text">{{ spellWords[spellIndex].word }}　{{ spellWords[spellIndex].meaning }}</text></view></view><view class="bottom-action"><button class="primary-button" @tap="spellAction">{{ answered ? (spellIndex < spellWords.length - 1 ? '下一个单词' : '完成练习') : '检查拼写' }}</button></view></view>
@@ -85,7 +83,7 @@
         <view class="grammarlist"><view v-for="(item,i) in visibleGrammar" :key="item.title" class="gramrow" @tap="openGrammar(item.sourceIndex)"><view class="gramicon">{{ ['时','让','时','句'][item.sourceIndex % 4] }}</view><view class="gramrow-copy"><text class="gramrow-title">{{ item.title }}</text><text class="gramrow-sub">{{ item.level }}　·　讲解与练习</text></view><text class="arr">›</text></view></view>
       </view>
 
-      <view v-else-if="view === 'gramdetail'" class="page"><view class="grammar-hero"><text class="eyebrow">GRAMMAR NOTE</text><text class="large-title">{{ currentGrammar.title }}</text><text class="muted">{{ currentGrammar.summary }}</text></view><view class="section-head"><text class="section-title">什么时候这样用？</text></view><view class="card detail-card"><text class="detail-copy">{{ currentGrammar.explanation }}</text></view><view class="section-head"><text class="section-title">结构拆解</text></view><view class="card grammar-pattern"><text class="pattern-text">{{ currentGrammar.pattern }}</text></view><view class="section-head"><text class="section-title">例句观察</text></view><view v-for="(ex,i) in currentGrammar.examples" :key="i" class="card example-card"><text class="example-en">{{ formatEnglish(ex.en) }}</text><text class="example-cn">{{ ex.cn }}</text></view><view class="bottom-action"><button class="primary-button" @tap="startGrammarQuiz">做几道练习</button></view></view>
+      <view v-else-if="view === 'gramdetail'" class="page"><view class="grammar-hero"><text class="eyebrow">GRAMMAR NOTE</text><text class="large-title">{{ currentGrammar.title }}</text><text class="muted">{{ currentGrammar.summary }}</text></view><view v-if="currentGrammarContent.type === 'officialAccount'" class="card source-card"><text class="detail-label">公众号文章</text><text class="card-title">{{ currentGrammarContent.title || '查看关联的公众号文章' }}</text><text class="card-sub">{{ currentGrammarContent.summary || '语法详解内容来自关联的公众号文章。' }}</text><button class="source-button" @tap="openOfficialSource(currentGrammarContent)">阅读公众号原文</button></view><rich-text v-else class="rich-content card" :nodes="currentGrammarContent.html" /><view class="bottom-action"><button class="primary-button" @tap="startGrammarQuiz">做几道练习</button></view></view>
 
       <view v-else-if="view === 'gramquiz'" class="page question-page"><view class="progress-row"><view class="progress-track"><view class="progress-fill" :style="{width: (grammarAnswered ? '100%' : '35%')}"></view></view><text class="muted">练习</text></view><text class="question-type">语法小练习</text><text class="question-title">{{ currentGrammar.quiz.prompt }}</text><view class="option-list"><view v-for="(option,i) in currentGrammar.quiz.options" :key="i" class="option-card" :class="optionState(i)" @tap="chooseGrammar(i)"><text class="option-letter">{{ String.fromCharCode(65+i) }}</text><text>{{ option }}</text><text v-if="grammarAnswered && i === currentGrammar.quiz.answer" class="option-check">✓</text></view></view><view v-if="grammarAnswered" class="explanation"><text class="explanation-title">{{ grammarCorrect ? '回答正确' : '看看解析' }}</text><text class="explanation-text">{{ currentGrammar.quiz.explanation }}</text></view><view class="bottom-action"><button class="primary-button" @tap="grammarQuizAction">{{ grammarAnswered ? '返回语法解析' : '确认答案' }}</button></view></view>
 
@@ -105,7 +103,7 @@
 
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue'
-import { articles, words, grammar, puzzleSets as puzzleSetsData } from '../pages/index/learning-data.js'
+import { articles, words, grammar, puzzleSets as puzzleSetsData, getWordContentSource, getGrammarContentSource } from '../pages/index/learning-data.js'
 
 const props = defineProps({ initialView: { type: String, default: 'home' }, initialIndex: { type: Number, default: 0 }, returnView: { type: String, default: 'vocab' } })
 const view = ref(props.initialView)
@@ -146,6 +144,8 @@ const storyWordCounts = [148, 126]
 const currentArticle = computed(() => articles[articleIndex.value] || articles[0])
 const currentWord = computed(() => allWords[wordIndex.value] || allWords[0])
 const currentGrammar = computed(() => grammarItems[grammarIndex.value] || grammarItems[0])
+const currentWordContent = computed(() => getWordContentSource(currentWord.value))
+const currentGrammarContent = computed(() => getGrammarContentSource(currentGrammar.value))
 const currentQuestion = computed(() => currentArticle.value.questions[questionIndex.value] || currentArticle.value.questions[0])
 const filteredArticles = computed(() => readingFilter.value === '全部' ? articles : articles.filter((a,i) => readingFilter.value === '高级' ? i > 0 : i === 0))
 const visibleGrammar = computed(() => grammarFilter.value === '全部' ? grammarItems.map((item,index) => ({ ...item, sourceIndex:index })) : grammarItems.map((item,index) => ({ ...item, sourceIndex:index })).filter(item => grammarFilter.value === '基础' ? item.level.includes('基础') : grammarFilter.value === '时态' ? item.title.includes('时') || item.title.includes('过去') : item.title.includes('从句')))
@@ -169,6 +169,15 @@ function recentTone(type) { return ({article:'blue',word:'mint',grammar:'lilac',
 function openRecent(item) { if (item.type === 'article') openArticle(item.index); else if (item.type === 'word') openWord(item.index); else if (item.type === 'grammar') openGrammar(item.index); else if (item.type === 'puzzle') startPuzzle(item.index) }
 function clearRecent() { recentItems.value = []; try { uni.removeStorageSync('readEnglishRecent'); uni.$emit('readEnglishRecentUpdate') } catch (_) {} }
 function formatEnglish(text) { return text.replace(/([’'])(?=[a-z])/gi, '$1\u2060') }
+function openOfficialSource(source) { if (!source.url) { toast('公众号文章链接暂不可用'); return }
+  // #ifdef MP-WEIXIN
+  if (typeof wx !== 'undefined' && wx.openOfficialAccountArticle) wx.openOfficialAccountArticle({ url:source.url, fail:() => toast('暂时无法打开公众号文章') })
+  else toast('请更新微信后再打开公众号文章')
+  // #endif
+  // #ifdef H5
+  window.open(source.url, '_blank', 'noopener')
+  // #endif
+}
 function go(next) { const routes = {home:'/pages/index/index',reading:'/pages/reading/index',article:'/pages/reading/article',questions:'/pages/reading/questions',vocab:'/pages/vocab/index',wordlist:'/pages/vocab/list',worddetail:'/pages/vocab/detail',spell:'/pages/vocab/spell',grammar:'/pages/grammar/index',gramlist:'/pages/grammar/index',gramdetail:'/pages/grammar/detail',gramquiz:'/pages/grammar/quiz',puzzle:'/pages/puzzle/index',puzzleplay:'/pages/puzzle/play',recent:'/pages/recent/index'}; if (routes[next] && next !== props.initialView) { const item = next === 'article' || next === 'questions' ? articleIndex.value : next === 'worddetail' || next === 'spell' ? wordIndex.value : next === 'gramdetail' || next === 'gramquiz' ? grammarIndex.value : next === 'puzzleplay' ? puzzleSetIndex.value : 0; const extra = next === 'spell' ? '&from=' + spellReturn.value : ''; uni.navigateTo({url: routes[next] + '?item=' + item + extra}); return }; if (next === view.value) return; viewStack.value.push(view.value); view.value = next; if (['home','reading','vocab','grammar','puzzle'].includes(next)) activeTab.value = next; scrollTop.value = 0 }
 function back() { if (viewStack.value.length) { view.value = viewStack.value.pop(); if (['home','reading','vocab','grammar','puzzle'].includes(view.value)) activeTab.value = view.value } else if (props.initialView !== 'home') { uni.navigateBack({ fail: () => uni.redirectTo({url:'/pages/index/index'}) }); return } else { view.value = 'home'; activeTab.value = 'home' }; scrollTop.value = 0 }
 function openArticle(i) { articleIndex.value = i; questionIndex.value = 0; selectedSentence.value = ''; const article = articles[i] || articles[0]; trackRecent('article', i, article.title, article.translation + ' · 精读文章'); go('article') }
@@ -281,5 +290,10 @@ page{height:100%;background:#f4f7fc;color:#303d53;font-family:-apple-system,Blin
 .recent-empty{margin:0 30rpx 18rpx;display:flex;flex-direction:column;gap:10rpx;padding:26rpx}
 .clear-history{display:block;text-align:center;padding:24rpx;color:#8794a6;font-size:22rpx}
 .empty-modules{display:flex;justify-content:space-between;margin-top:18rpx;color:#3978ef;font-size:23rpx}
+.rich-content{display:block;margin:0 0 18rpx;padding:28rpx;border-radius:28rpx;background:#fff;color:#506079;font-size:24rpx;line-height:1.85;box-shadow:0 6rpx 20rpx #263a5d08}
+.rich-content h3{margin:22rpx 0 10rpx;color:#354968;font-size:28rpx;line-height:1.45}
+.rich-content p{margin:0 0 14rpx}
+.source-card{display:flex;flex-direction:column;gap:12rpx}
+.source-button{height:78rpx;margin:10rpx 0 0;border:0;border-radius:20rpx;background:#3978ef;color:#fff;font-size:25rpx;font-weight:700;line-height:78rpx}
 @media (max-width: 360px){.hero-title{font-size:39rpx}.module-desc{font-size:17rpx}.article-art{width:136rpx;height:136rpx}}
 </style>
