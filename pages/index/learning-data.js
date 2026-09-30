@@ -23,6 +23,11 @@ export const grammar = [
 
 // Sentence puzzles are their own learning collection, not derived from article IDs.
 export const puzzleSets = [
+  {id:'umbrella-reading',sourceArticleId:'umbrella',title:'The Blue Umbrella',subtitle:'精读文章配套 · 重点句语序',icon:'☂',items:[
+    {cn:'莉莉把雨伞递给了那个女孩。',answer:'Lily handed her the umbrella.'},
+    {cn:'虽然雨很冷，莉莉心里却感到温暖。',answer:'Lily felt warm even though the rain was cold.'},
+    {cn:'一个小小的善举也能照亮别人的一天。',answer:'A small act of kindness can brighten someone’s day.'}
+  ]},
   {id:'daily-expression',title:'日常表达',subtitle:'生活场景 · 基础语序',icon:'Aa',items:[
     {cn:'我每天早上喝一杯温水。',answer:'I drink a glass of warm water every morning.'},
     {cn:'她通常坐公交车去上班。',answer:'She usually takes the bus to work.'},
@@ -36,6 +41,18 @@ export const puzzleSets = [
     {cn:'一个小小的帮助也能让人开心。',answer:'A little help can make someone feel happy.'}
   ]}
 ]
+
+// Article-specific grammar notes intentionally live separately from the global grammar library.
+export const articleGrammar = {
+  umbrella:[
+    {title:'一般过去时：讲述已经发生的事',summary:'found、carried、handed 描述故事中的过去动作',explanation:'故事讲的是已经发生的事情，所以主要动作使用一般过去时。find 的过去式是不规则变化 found；carry 变过去式时先把 y 改成 i 再加 -ed，成为 carried；handed 则直接加 -ed。',pattern:'主语 + 动词过去式 + 其他',examples:[{en:'Lily found a blue umbrella.',cn:'莉莉发现了一把蓝色雨伞。'},{en:'Lily handed her the umbrella.',cn:'莉莉把雨伞递给了她。'}]},
+    {title:'even though：让步关系',summary:'连接“虽然下雨很冷”与“莉莉感到温暖”',explanation:'even though 引出一个与主句形成反差的事实。本文中雨很冷，但莉莉帮助别人后心里感到温暖。它和 although 意义相近，语气稍强调。',pattern:'主句 + even though + 主语 + 谓语',examples:[{en:'Lily felt warm, even though the rain was cold.',cn:'虽然雨很冷，莉莉心里却感到温暖。'}]}
+  ],
+  seed:[
+    {title:'一般过去时：按顺序叙述故事',summary:'saw、gave、placed、appeared 描写过去发生的动作',explanation:'故事中的种子、嫩芽和花依次出现，叙述已经完成的动作时使用一般过去时。注意 see 的过去式是 saw，give 的过去式是 gave，都是不规则变化。',pattern:'主语 + 动词过去式 + 其他',examples:[{en:'One day, he saw a tiny seed.',cn:'一天，他看到了一颗小种子。'},{en:'Ben gave the seed a little water.',cn:'本给种子浇了一点水。'}]},
+    {title:'when 引导时间状语从句',summary:'交代另一个动作发生的时间',explanation:'when 在句中表示“当……时”。本篇可以用它把照料种子和种子发芽的过程联系起来；叙述过去事件时，主句和从句的动词都要与过去时间保持一致。',pattern:'When + 主语 + 过去式，主语 + 过去式',examples:[{en:'When the shoot appeared, Ben smiled.',cn:'嫩芽出现时，本笑了。'}]}
+  ]
+}
 
 // Word and grammar lessons own their content. An admin/API can replace contentSource
 // with { type: 'richtext', html } or { type: 'officialAccount', url, title, summary }.
