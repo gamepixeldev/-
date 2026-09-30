@@ -20,3 +20,19 @@ export const grammar = [
  {title:'Although 引导让步状语从句',summary:'表达“虽然……但是……”',level:'进阶语法',explanation:'although 引导让步状语从句，说明某种情况存在，但主句结果与预期不同。although 和 but 通常不在同一个句子中同时使用。',pattern:'Although + 主语 + 谓语，主语 + 谓语',examples:[{en:'Although the rain was cold, Lily felt warm.',cn:'虽然雨很冷，莉莉心里却很温暖。'}],quiz:{prompt:'选择正确的连接词：___ it was raining, they went outside.',options:['Although','Because','So','Or'],answer:0,explanation:'句意是“虽然在下雨，他们还是出去了”，需要 although 表示让步。'}},
  {title:'When 引导时间状语从句',summary:'描述某个时间发生的动作',level:'基础语法',explanation:'when 可以引导时间状语从句，表示“当……时”。讲述过去发生的事时，主句和从句中的动词通常都使用过去时。',pattern:'When + 一般过去时，主语 + 一般过去时',examples:[{en:'When the girl came in, Lily handed her the umbrella.',cn:'女孩进来时，莉莉把雨伞递给了她。'}],quiz:{prompt:'When Ben ___ the flower, he smiled.',options:['see','saw','sees','seeing'],answer:1,explanation:'故事发生在过去，see 的过去式是 saw。'}}
 ]
+
+// Sentence puzzles are their own learning collection, not derived from article IDs.
+export const puzzleSets = [
+  {id:'daily-expression',title:'日常表达',subtitle:'生活场景 · 基础语序',icon:'Aa',items:[
+    {cn:'我每天早上喝一杯温水。',answer:'I drink a glass of warm water every morning.'},
+    {cn:'她通常坐公交车去上班。',answer:'She usually takes the bus to work.'},
+    {cn:'我们晚饭后在公园散步。',answer:'We take a walk in the park after dinner.'},
+    {cn:'请把你的书放在桌子上。',answer:'Please put your book on the table.'}
+  ]},
+  {id:'small-moments',title:'生活小片段',subtitle:'短句理解 · 动作顺序',icon:'✦',items:[
+    {cn:'雨停以后，孩子们跑到外面去了。',answer:'The children ran outside after the rain stopped.'},
+    {cn:'他发现一张纸条夹在书里。',answer:'He found a note between the pages of the book.'},
+    {cn:'奶奶每天给窗台上的植物浇水。',answer:'Grandma waters the plants on the windowsill every day.'},
+    {cn:'一个小小的帮助也能让人开心。',answer:'A little help can make someone feel happy.'}
+  ]}
+]
