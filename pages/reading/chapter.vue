@@ -1,4 +1,4 @@
-<template><view class="route-host" v-if="ready"><StudyShell initial-view="externalchapter" :initial-index="seriesIndex" :initial-chapter="chapterIndex" /></view></template>
+<template><view class="route-host" v-if="ready"><StudyShell initial-view="article" initial-source="external" :initial-index="seriesIndex" :initial-chapter="chapterIndex" /></view></template>
 <script setup>
 import { ref } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'

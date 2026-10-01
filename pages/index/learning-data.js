@@ -35,8 +35,51 @@ export const words = [
  {word:'corner',ipa:'/ˈkɔːrnər/',pos:'n.',meaning:'拐角；角落',frequency:'常用词',note:'on the corner 常表示“在拐角处”；in the corner 表示“在角落里”。',forms:'on the corner of the street 在街道拐角处',memory:'街角的小店：a shop on the corner。',examples:[{en:'There is a bakery on the corner.',cn:'拐角处有一家面包店。'}]},
  {word:'hand',ipa:'/hænd/',pos:'v.',meaning:'递；交给',frequency:'常用词',note:'作动词表示把东西递给某人，常用 hand sth. to sb. 或 hand sb. sth.。',forms:'hands; handed; handing',memory:'hand someone a book：递给某人一本书。',examples:[{en:'She handed the keys to her brother.',cn:'她把钥匙递给了弟弟。'}]},
  {word:'brighten',ipa:'/ˈbraɪtn/',pos:'v.',meaning:'使明亮；使开心',frequency:'常用词',note:'brighten someone’s day 是常见表达，意为“让某人开心起来；使某人一天愉快”。',forms:'bright adj. 明亮的；brightness n. 明亮',memory:'bright（明亮的）+ -en（使……）→ brighten（使明亮）。',examples:[{en:'Your message brightened my day.',cn:'你的消息让我这一天都开心起来。'}]},
- {word:'seed',ipa:'/siːd/',pos:'n.',meaning:'种子',frequency:'常用词',note:'可数名词；plant a seed 表示“播种”。',forms:'复数 seeds',memory:'A seed can grow into a plant. 种子可以长成植物。',examples:[{en:'The seed needs water and sunlight.',cn:'这颗种子需要水和阳光。'}]}
+ {word:'seed',ipa:'/siːd/',pos:'n.',meaning:'种子',frequency:'常用词',note:'可数名词；plant a seed 表示“播种”。',forms:'复数 seeds',memory:'A seed can grow into a plant. 种子可以长成植物。',examples:[{en:'The seed needs water and sunlight.',cn:'这颗种子需要水和阳光。'}]},
+ {word:'quiet',ipa:'/ˈkwaɪət/',pos:'adj.',meaning:'安静的；平静的',frequency:'常用词',note:'描述声音小、环境安静，也可形容人不爱说话。',forms:'比较级 quieter；最高级 quietest',memory:'quiet afternoon：安静的午后。',examples:[{en:'Emma arrived on a quiet Tuesday.',cn:'艾玛在一个安静的星期二到达。'}]},
+ {word:'letter',ipa:'/ˈletər/',pos:'n.',meaning:'信；字母',frequency:'常用词',note:'表示“信”时是可数名词；a letter from someone 表示某人寄来的信。',forms:'复数 letters',memory:'write a letter：写一封信。',examples:[{en:'She found a letter with her name on it.',cn:'她发现了一封写着自己名字的信。'}]},
+ {word:'worry',ipa:'/ˈwɜːri/',pos:'n. / v.',meaning:'担心；使担忧',frequency:'常用词',note:'作动词表示担心某事；作名词表示忧虑。feel a sudden worry 表示突然感到担忧。',forms:'worried adj. 担心的；worry about：担心……',memory:'Do not worry. 别担心。',examples:[{en:'Leo felt a sudden worry.',cn:'Leo 忽然感到担忧。'}]},
+ {word:'harbor',ipa:'/ˈhɑːrbər/',pos:'n.',meaning:'港口；港湾',frequency:'常用词',note:'美式拼写 harbor；英式常写作 harbour。',forms:'复数 harbors',memory:'a fishing boat in the harbor：港口里的一艘渔船。',examples:[{en:'The lighthouse stood above the harbor.',cn:'灯塔矗立在港口上方。'}]},
+ {word:'beneath',ipa:'/bɪˈniːθ/',pos:'prep.',meaning:'在……下面',frequency:'常用词',note:'表示位置低于某物，语气比 under 稍正式。',forms:'beneath the lamp：在灯下面',memory:'The note is beneath the book. 纸条在书下面。',examples:[{en:'A notebook lay beneath the lamp.',cn:'灯下面放着一本笔记本。'}]},
+ {word:'storm',ipa:'/stɔːrm/',pos:'n.',meaning:'暴风雨；风暴',frequency:'常用词',note:'可数名词，常与 a、the 连用；a storm rolls in 表示风暴袭来。',forms:'复数 storms',memory:'A storm is stronger than ordinary rain. 风暴比普通降雨更猛烈。',examples:[{en:'A storm rolled in from the sea.',cn:'一场风暴从海上袭来。'}]},
+ {word:'safely',ipa:'/ˈseɪfli/',pos:'adv.',meaning:'安全地；平安地',frequency:'常用词',note:'副词，修饰动作，说明事情发生时没有危险。',forms:'safe adj. 安全的；safety n. 安全',memory:'return safely：平安归来。',examples:[{en:'The boat turned safely toward the harbor.',cn:'船安全地转向港口。'}]},
+ {word:'notice',ipa:'/ˈnoʊtɪs/',pos:'n.',meaning:'通知；告示',frequency:'常用词',note:'作名词表示通知或告示；作动词表示“注意到”。',forms:'notice board：公告栏；notice that：注意到……',memory:'read a notice：阅读一则通知。',examples:[{en:'A notice appeared on the door.',cn:'门上出现了一张通知。'}]},
+ {word:'memory',ipa:'/ˈmeməri/',pos:'n.',meaning:'记忆；回忆',frequency:'常用词',note:'可数时表示一段回忆，不可数时表示记忆力。',forms:'复数 memories',memory:'share a memory：分享一段回忆。',examples:[{en:'The adults shared memories of the bookshop.',cn:'大人们分享了关于书店的回忆。'}]},
+ {word:'alive',ipa:'/əˈlaɪv/',pos:'adj.',meaning:'活着的；继续存在的',frequency:'常用词',note:'常放在系动词或名词之后；keep something alive 表示让某事物继续存在。',forms:'keep the shop alive：让书店继续经营下去',memory:'The garden feels alive in spring. 春天的花园充满生机。',examples:[{en:'They helped keep the bookshop alive.',cn:'他们帮助书店继续经营下去。'}]},
+ {word:'fold',ipa:'/foʊld/',pos:'v.',meaning:'折叠；对折',frequency:'常用词',note:'fold paper into a boat 表示把纸折成一只船。',forms:'folded; folding',memory:'fold a piece of paper：折一张纸。',examples:[{en:'Nora folded a small boat from a page.',cn:'Nora 用一页纸折了一只小船。'}]},
+ {word:'stream',ipa:'/striːm/',pos:'n.',meaning:'小溪；水流',frequency:'常用词',note:'通常指较小的自然水流；也可表示连续不断的一股东西。',forms:'复数 streams',memory:'a stream beside the road：路边的一条小溪。',examples:[{en:'She placed the boat in the stream.',cn:'她把小船放进小溪里。'}]},
+ {word:'downstream',ipa:'/ˌdaʊnˈstriːm/',pos:'adv.',meaning:'顺流而下',frequency:'拓展词',note:'表示顺着水流方向移动；反义表达为 upstream（逆流而上）。',forms:'downstream from：在……的下游',memory:'down + stream：沿着溪流向下游。',examples:[{en:'The boat carried two wishes downstream.',cn:'小船载着两份祝福顺流而下。'}]},
+ {word:'neighbor',ipa:'/ˈneɪbər/',pos:'n.',meaning:'邻居；邻近的人',frequency:'常用词',note:'美式拼写 neighbor；英式拼写 neighbour。',forms:'复数 neighbors',memory:'next-door neighbor：隔壁邻居。',examples:[{en:'A new neighbor moved into the house next door.',cn:'一位新邻居搬进了隔壁的房子。'}]},
+ {word:'fence',ipa:'/fens/',pos:'n.',meaning:'栅栏；篱笆',frequency:'常用词',note:'常指围住花园或院子的栅栏；也可作动词表示“用栅栏围住”。',forms:'a garden fence：花园的篱笆',memory:'Flowers grew along the fence. 花沿着篱笆生长。',examples:[{en:'Tiny leaves appeared by the fence.',cn:'篱笆旁冒出了嫩叶。'}]}
 ]
+
+const externalChapterLessons = {
+  'lighthouse-letter':[
+    {words:['quiet','letter'],question:{type:'细节理解',kind:'choice',prompt:'Where did Emma find the letter?',cn:'艾玛在哪里发现了那封信？',options:['In a wooden box','Beside the lighthouse','Under the desk','On the boat'],answer:0,explanation:'第一章写到 Emma 在一个木盒里发现了信。'}},
+    {words:['harbor','beneath'],question:{type:'细节理解',kind:'choice',prompt:'What did Emma find beneath the lamp?',cn:'艾玛在灯下面发现了什么？',options:['A notebook','A photograph','A key','A map'],answer:0,explanation:'她在铜灯下面发现了一本笔记本。'}},
+    {words:['storm','safely'],question:{type:'推理判断',kind:'choice',prompt:'Why did the fishing boat turn toward the harbor?',cn:'渔船为什么转向港口？',options:['The lighthouse was shining again.','Emma called the harbor.','The storm had disappeared.','The boat had run out of fuel.'],answer:0,explanation:'灯塔重新亮起，为海上的船只指引了安全返航的方向。'}}
+  ],
+  'last-bookshop':[
+    {words:['notice','worry'],question:{type:'细节理解',kind:'choice',prompt:'When would the building close?',cn:'这栋楼什么时候关闭？',options:['At the end of the month','The next morning','At the end of the year','After the reading evening'],answer:0,explanation:'门上的通知写明，这栋楼将在月底关闭。'}},
+    {words:['memory'],question:{type:'细节理解',kind:'choice',prompt:'What did the adults do at the reading evening?',cn:'阅读之夜上，大人们做了什么？',options:['Shared memories','Sold their books','Painted the shop','Wrote a notice'],answer:0,explanation:'文章提到孩子们朗读故事，大人们分享回忆。'}},
+    {words:['alive'],question:{type:'推理判断',kind:'choice',prompt:'Why did the bookshop stay open for another year?',cn:'书店为什么又能继续营业一年？',options:['The community showed that it cared about the shop.','Mr. Reed bought a new building.','Leo decided to move away.','The landlord wanted to open a café.'],answer:0,explanation:'居民们来参加活动并承诺继续支持书店，让房东看到了大家对书店的重视。'}}
+  ],
+  'paper-boat':[
+    {words:['fold','stream'],question:{type:'细节理解',kind:'choice',prompt:'What did Nora use to make the boat?',cn:'Nora 用什么做纸船？',options:['A page from her notebook','A leaf from a tree','A paper bag','A newspaper from home'],answer:0,explanation:'Nora 用笔记本上的一页纸折成了小船。'}},
+    {words:['downstream'],question:{type:'细节理解',kind:'choice',prompt:'What did the boy find inside the boat?',cn:'男孩在纸船里发现了什么？',options:['A note','A coin','A small key','A flower'],answer:0,explanation:'男孩在船里发现了一张写着祝福的纸条。'}}
+  ],
+  'garden-next-door':[
+    {words:['fence','neighbor'],question:{type:'细节理解',kind:'choice',prompt:'What did Mia notice by the fence?',cn:'Mia 在篱笆旁注意到了什么？',options:['A row of tiny green leaves','A new gate','A basket of apples','A little bird'],answer:0,explanation:'她看到篱笆旁长出了一排嫩绿的小叶子。'}},
+    {words:['seed','neighbor'],question:{type:'主旨归纳',kind:'choice',prompt:'What changed the relationship between the neighbors?',cn:'什么让邻居之间的关系发生了变化？',options:['Sharing seeds and working in the garden','Building a taller fence','Moving to another town','Buying flowers at a shop'],answer:0,explanation:'分享种子、一起种花让邻居们熟悉起来，篱笆也不再像隔阂。'}}
+  ]
+}
+externalSeries.forEach(series => series.chapters.forEach((chapter,index) => {
+  const lesson = externalChapterLessons[series.id][index]
+  chapter.words = lesson.words
+  chapter.questions = [lesson.question, {type:'主旨归纳',kind:'choice',prompt:'Which title best matches this chapter?',cn:'哪个标题最符合本章内容？',options:[chapter.title,...series.chapters.filter((_,i)=>i!==index).map(item=>item.title),'A Different Story'],answer:0,explanation:'本章围绕“' + chapter.title + '”展开，标题概括了主要内容。'}]
+  const firstSentence = chapter.paragraphs[0][0]
+  chapter.grammarNotes = [{title:'一般过去时：在故事中叙述往事',summary:'观察本章如何用过去时描述已经发生的动作',explanation:'故事讲述已经发生的经历，叙述主要动作时常使用一般过去时。阅读时可以留意动词形式，并结合上下文判断动作发生的时间。',pattern:'主语 + 动词过去式 + 其他',examples:[{en:firstSentence,cn:chapter.translations[0]}]}]
+}))
 
 export const grammar = [
  {title:'一般过去时：讲述过去发生的事',summary:'发现、寻找与故事叙述',level:'基础语法',explanation:'描述过去某个时间发生并结束的动作，常与 yesterday、one day、last week 等时间表达连用。规则动词通常加 -ed；不规则动词需要单独记忆。',pattern:'主语 + 动词过去式 + 其他',examples:[{en:'Lily found a blue umbrella.',cn:'莉莉发现了一把蓝色雨伞。'},{en:'Ben gave the seed some water.',cn:'本给种子浇了些水。'}],quiz:{prompt:'选择正确的动词形式：Yesterday, Lily ___ the umbrella.',options:['find','finds','found','finding'],answer:2,explanation:'Yesterday 表示过去时间，find 的过去式是不规则变化 found。'}},
