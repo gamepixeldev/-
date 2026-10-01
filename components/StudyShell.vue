@@ -31,7 +31,7 @@
         <view class="section-head"><text class="section-title">今天读点什么</text><text class="inline-link" @tap="go('reading')">全部文章　›</text></view>
         <view class="card recent-card" @tap="openArticle(0)"><view class="art-thumb art-blue"><text>{{ articles[0].icon }}</text></view><view class="recent-copy"><text class="card-title">{{ articles[0].title }}</text><text class="card-sub">{{ articles[0].translation }} · 原创短篇</text><view class="tag-row"><text class="tag">{{ articles[0].level }}</text><text class="tag">约 {{ articles[0].minutes }} 分钟</text></view></view><text class="chevron">›</text></view>
         <view class="section-head"><text class="section-title">最近学习</text><text class="inline-link" @tap="go('recent')">查看全部　›</text></view>
-        <view v-if="recentItems.length" v-for="(item,i) in recentItems.slice(0,3)" :key="item.key" class="card recent-line" @tap="openRecent(item)"><view class="mini-icon" :class="recentTone(item.type)">{{ recentIcon(item.type) }}</view><view class="recent-copy"><text class="card-title">{{ item.title }}</text><text class="card-sub">{{ item.subtitle }}</text></view><text class="chevron">›</text></view>
+        <view v-if="homeRecentItems.length" v-for="(item,i) in homeRecentItems.slice(0,3)" :key="item.key" class="card recent-line" @tap="openRecent(item)"><view class="mini-icon" :class="recentTone(item.type)">{{ recentIcon(item.type) }}</view><view class="recent-copy"><text class="card-title">{{ item.title }}</text><text class="card-sub">{{ item.subtitle }}</text></view><text class="chevron">›</text></view>
         <view v-else class="card recent-empty"><text class="card-title">你的学习记录会显示在这里</text><text class="card-sub">读一篇短文，或打开任意词条开始学习。</text></view>
       </view>
 
@@ -69,19 +69,19 @@
 
       <view v-else-if="view === 'vocab'" class="page vocab-page">
         <view class="vocab-intro"><text class="eyebrow">VOCABULARY</text><text class="large-title">把单词学懂，再记牢</text><text class="muted">释义、词性、例句和拼写练习</text></view>
-        <view class="card book-card"><view class="book-row"><view class="book-cover">Aa</view><view class="book-info"><text class="card-title">精选词汇</text><text class="card-sub">独立词汇库　·　{{ allWords.length }} 个词条</text><view class="progress-track"><view class="progress-fill" :style="{width: learnedWordPercent + '%'}"></view></view><text class="card-sub">已学会 {{ learnedWordCount }} 个　·　共 {{ allWords.length }} 个</text></view></view><view class="book-actions"><text @tap="go('wordlist')">浏览全部词汇　›</text><text @tap="beginSpelling('vocab')">拼写练习　›</text></view><button class="primary-button" @tap="openWord(nextWordIndex)">{{ learnedWordCount ? '继续学习' : '开始学习' }}</button></view>
-        <view class="section-head"><text class="section-title">最近浏览</text><text class="section-note">点单词查看完整详解</text></view>
+        <view class="card book-card"><view class="book-row"><view class="book-cover">Aa</view><view class="book-info"><text class="card-title">精选词汇</text><text class="card-sub">独立词汇库　·　{{ allWords.length }} 个词条</text><view class="progress-track"><view class="progress-fill" :style="{width: learnedWordPercent + '%'}"></view></view><text class="card-sub">已学完 {{ learnedWordCount }} 个　·　共 {{ allWords.length }} 个</text></view></view><view class="book-actions"><text @tap="go('wordlist')">浏览全部词汇　›</text><text @tap="beginSpelling('vocab')">拼写练习　›</text></view><button class="primary-button" @tap="openWord(nextWordIndex)">{{ learnedWordCount === allWords.length ? '重新学习' : learnedWordCount ? '继续学习' : '开始学习' }}</button></view>
+        <view class="section-head"><text class="section-title">最近学习</text><text class="section-note">点单词查看完整详解</text></view>
         <view v-if="recentWords.length" class="word-list"><view v-for="item in recentWords" :key="item.key" class="card word-row" @tap="openWord(item.index)"><view><text class="word-main">{{ allWords[item.index].word }}</text><text class="word-sub">{{ allWords[item.index].pos }}　{{ allWords[item.index].meaning }}</text></view><text class="chevron">›</text></view></view>
-        <view v-else class="card word-empty"><text class="card-title">还没有浏览过单词</text><text class="card-sub">从精选词汇开始，学过的词会显示在这里。</text><text class="inline-link" @tap="go('wordlist')">浏览全部词汇　›</text></view>
+        <view v-else class="card word-empty"><text class="card-title">还没有学完的单词</text><text class="card-sub">读完详解并完成拼写，单词就会显示在这里。</text><text class="inline-link" @tap="go('wordlist')">浏览全部词汇　›</text></view>
       </view>
 
       <view v-else-if="view === 'wordlist'" class="page"><view class="intro-block"><text class="eyebrow">WORD LIST</text><text class="large-title">{{ isScopedArticle ? currentArticle.translation + ' · 重点词汇' : '精选词汇' }}</text><text class="muted">{{ isScopedArticle ? '这些词汇选自本文，点击单词查看完整详解' : '独立词库，可按需浏览词条' }}</text></view><view class="word-list"><view v-for="(word,i) in visibleWordList" :key="word.word" class="card word-row" @tap="openWord(allWords.indexOf(word))"><view><text class="word-main">{{ word.word }}</text><text class="word-sub">{{ word.pos }}　{{ word.meaning }}</text></view><text class="chevron">›</text></view></view><view class="bottom-action"><button class="primary-button" @tap="beginSpelling(isScopedArticle ? 'articlewordlist' : 'wordlist')">开始拼写练习</button></view></view>
 
-      <view v-else-if="view === 'worddetail'" class="page word-detail-page"><view class="word-hero"><text class="eyebrow">WORD {{ wordIndex + 1 }} / {{ allWords.length }}</text><text class="word-display">{{ currentWord.word }}</text><view class="pronounce-row"><text class="pronunciation">{{ currentWord.ipa }}</text></view><view class="word-badges"><text class="tag">{{ currentWord.pos }}</text><text class="tag">{{ currentWord.frequency }}</text></view><text class="meaning">{{ currentWord.meaning }}</text></view>
+      <view v-else-if="view === 'worddetail'" class="page word-detail-page"><view class="word-hero"><text class="eyebrow">WORD {{ wordIndex + 1 }} / {{ allWords.length }}</text><text class="word-display">{{ currentWord.word }}</text><view class="pronounce-row"><text class="pronunciation">{{ currentWord.ipa }}</text></view><view class="word-badges"><text class="tag">{{ currentWord.pos }}</text><text class="tag">{{ currentWord.frequency }}</text><text v-if="isCurrentWordLearned" class="tag learned-tag">✓ 已学完</text></view><text class="meaning">{{ currentWord.meaning }}</text></view>
         <view v-if="currentWordContent.type === 'officialAccount'" class="card source-card"><text class="detail-label">公众号文章</text><text class="card-title">{{ currentWordContent.title || '查看关联的公众号文章' }}</text><text class="card-sub">{{ currentWordContent.summary || '词汇详解内容来自关联的公众号文章。' }}</text><button class="source-button" @tap="openOfficialSource(currentWordContent)">阅读公众号原文</button></view><rich-text v-else class="rich-content card" :nodes="currentWordContent.html" />
-        <view class="bottom-action"><button class="learned-button" :class="{done:isCurrentWordLearned}" @tap="markWordLearned">{{ isCurrentWordLearned ? '✓ 已学会' : '标记已学会' }}</button><view class="dual-action"><button class="secondary-button" @tap="beginSpelling('worddetail')">拼写练习</button><button class="primary-button" @tap="nextWordDetail">下一个单词</button></view></view></view>
+        <view class="bottom-action"><button class="primary-button" @tap="beginSpelling('worddetail')">下一步 · 拼写练习</button></view></view>
 
-      <view v-else-if="view === 'spell'" class="page spell-page"><view class="progress-row"><view class="progress-track"><view class="progress-fill" :style="{width: ((spellIndex + 1) / spellWords.length * 100) + '%'}"></view></view></view><view class="spell-prompt"><text class="eyebrow">根据中文释义拼出单词</text><text class="spell-meaning">{{ spellWords[spellIndex].pos }}　{{ spellWords[spellIndex].meaning }}</text><text class="hint-link" @tap="toast('首字母提示：' + spellWords[spellIndex].word[0])">需要提示？</text></view><view class="card spelling-card"><view class="letter-slots"><view v-for="(letter,i) in spellSlots" :key="i" class="letter-slot" @tap="removeLetter(i)">{{ letter || '' }}</view></view><view class="letter-bank"><button v-for="(letter,i) in letterBank" :key="i" class="letter-key" :disabled="usedLetters.includes(i) || answered" @tap="addLetter(i)">{{ letter }}</button></view><view v-if="answered" class="explanation"><text class="explanation-title">{{ isCorrect ? '拼写正确！' : '再看一眼正确拼法' }}</text><text class="explanation-text">{{ spellWords[spellIndex].word }}　{{ spellWords[spellIndex].meaning }}</text></view></view><view class="bottom-action"><button class="primary-button" @tap="spellAction">{{ answered ? (spellIndex < spellWords.length - 1 ? '下一个单词' : '完成练习') : '检查拼写' }}</button></view></view>
+      <view v-else-if="view === 'spell'" class="page spell-page"><view class="progress-row"><view class="progress-track"><view class="progress-fill" :style="{width: spellProgressPercent + '%'}"></view></view></view><view class="spell-prompt"><text class="eyebrow">根据中文释义拼出单词</text><text class="spell-meaning">{{ spellWords[spellIndex].pos }}　{{ spellWords[spellIndex].meaning }}</text><text class="hint-link" @tap="toast('首字母提示：' + spellWords[spellIndex].word[0])">需要提示？</text></view><view class="card spelling-card"><view class="letter-slots"><view v-for="(letter,i) in spellSlots" :key="i" class="letter-slot" @tap="removeLetter(i)">{{ letter || '' }}</view></view><view class="letter-bank"><button v-for="(letter,i) in letterBank" :key="i" class="letter-key" :disabled="usedLetters.includes(i) || answered" @tap="addLetter(i)">{{ letter }}</button></view><view v-if="answered" class="explanation"><text class="explanation-title">{{ isCorrect ? (spellReturn === 'worddetail' ? '拼写正确，本词已学完！' : '拼写正确！') : '拼写有误，再试一次' }}</text><text class="explanation-text">{{ spellWords[spellIndex].word }}　{{ spellWords[spellIndex].meaning }}</text></view></view><view class="bottom-action"><button class="primary-button" @tap="spellAction">{{ spellActionLabel }}</button></view></view>
 
       <view v-else-if="view === 'grammar' || view === 'gramlist'" class="page grammar-page">
         <view class="hero-home grammar-home-hero"><view class="eyebrow">GRAMMAR NOTES</view><text class="grammar-hero-title">理解规则，<br/>再把句子说清楚。</text><text class="grammar-hero-sub">选知识点，自由开始学习</text><view class="hero-book grammar-book">文</view></view>
@@ -112,7 +112,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
 import { articles, externalSeries as externalSeriesData, words, grammar, articleGrammar, puzzleSets as puzzleSetsData, getWordContentSource, getGrammarContentSource } from '../pages/index/learning-data.js'
 
 const props = defineProps({ initialView: { type: String, default: 'home' }, initialIndex: { type: Number, default: 0 }, initialPuzzleIndex: { type: Number, default: 0 }, initialChapter: { type: Number, default: 0 }, initialSource: { type: String, default: 'article' }, initialNote: { type: Number, default: 0 }, sourceArticleIndex: { type: Number, default: -1 }, returnView: { type: String, default: 'vocab' } })
@@ -161,7 +161,8 @@ const allWords = words
 const learnedWordCount = computed(() => allWords.filter(word => wordCompletion.value[word.word]).length)
 const learnedWordPercent = computed(() => allWords.length ? learnedWordCount.value / allWords.length * 100 : 0)
 const nextWordIndex = computed(() => Math.max(0, allWords.findIndex(word => !wordCompletion.value[word.word])))
-const recentWords = computed(() => recentItems.value.filter(item => item.type === 'word' && allWords[item.index]).slice(0, 5))
+const recentWords = computed(() => recentItems.value.filter(item => item.type === 'word' && allWords[item.index] && wordCompletion.value[allWords[item.index].word]).slice(0, 5))
+const homeRecentItems = computed(() => recentItems.value.filter(item => item.type !== 'word' || wordCompletion.value[allWords[item.index]?.word]))
 const grammarItems = grammar
 const storyWordCounts = [148, 126]
 const isExternalReading = computed(() => readingSource.value === 'external')
@@ -176,6 +177,8 @@ const currentArticleGrammarNote = computed(() => currentArticleGrammar.value[art
 const articleGrammarContent = computed(() => getGrammarContentSource(currentArticleGrammarNote.value))
 const currentWord = computed(() => allWords[wordIndex.value] || allWords[0])
 const isCurrentWordLearned = computed(() => Boolean(wordCompletion.value[currentWord.value.word]))
+const spellActionLabel = computed(() => !answered.value ? '检查拼写' : spellReturn.value === 'worddetail' ? !isCorrect.value ? '重新拼写' : wordIndex.value < allWords.length - 1 ? '下一个单词' : '完成本轮学习' : spellIndex.value < spellWords.value.length - 1 ? '下一个单词' : '完成练习')
+const spellProgressPercent = computed(() => spellWords.value.length ? (spellIndex.value + (answered.value && isCorrect.value ? 1 : 0)) / spellWords.value.length * 100 : 0)
 const currentGrammar = computed(() => grammarItems[grammarIndex.value] || grammarItems[0])
 const currentWordContent = computed(() => getWordContentSource(currentWord.value))
 const currentGrammarContent = computed(() => getGrammarContentSource(currentGrammar.value))
@@ -193,7 +196,7 @@ const puzzleSets = puzzleSetsData
 const recentCategories = computed(() => [
   {id:'reading',label:'精读',items:recentItems.value.filter(item => ['article','externalArticle'].includes(item.type))},
   {id:'grammar',label:'语法',items:recentItems.value.filter(item => item.type === 'grammar')},
-  {id:'word',label:'单词',items:recentItems.value.filter(item => item.type === 'word')},
+  {id:'word',label:'单词',items:recentItems.value.filter(item => item.type === 'word' && wordCompletion.value[allWords[item.index]?.word])},
   {id:'puzzle',label:'拼句',items:recentItems.value.filter(item => item.type === 'puzzle')}
 ])
 const visibleRecentItems = computed(() => recentCategories.value.find(category => category.id === recentCategory.value)?.items || [])
@@ -201,7 +204,7 @@ const pagedRecentItems = computed(() => visibleRecentItems.value.slice(0, recent
 const recentPageSize = ref(10)
 const recentCategoryLabel = computed(() => recentCategories.value.find(category => category.id === recentCategory.value)?.label || '学习')
 const recentEmptyTitle = computed(() => ({reading:'还没有精读记录',grammar:'还没有语法学习记录',word:'还没有单词学习记录',puzzle:'还没有拼句进度'})[recentCategory.value])
-const recentEmptyDescription = computed(() => ({reading:'完成一篇文章后，会出现在这里。',grammar:'学习过的语法知识点会单独保存在这里。',word:'打开单词详解后，可以从这里继续学习。',puzzle:'开始任意一组拼句练习，进度会保存在这里。'})[recentCategory.value])
+const recentEmptyDescription = computed(() => ({reading:'完成一篇文章后，会出现在这里。',grammar:'学习过的语法知识点会单独保存在这里。',word:'读完详解并完成拼写后，单词会保存在这里。',puzzle:'开始任意一组拼句练习，进度会保存在这里。'})[recentCategory.value])
 const articlePuzzleSets = computed(() => puzzleSets.map((set,setIndex) => ({...set,setIndex})).filter(set => Boolean(set.sourceArticleId)))
 const independentPuzzleSets = computed(() => puzzleSets.map((set,setIndex) => ({...set,setIndex})).filter(set => !set.sourceArticleId))
 const puzzleSetIndex = ref(props.initialView === 'puzzleplay' ? props.initialIndex : 0)
@@ -228,7 +231,7 @@ function trackRecent(type, index, title, subtitle, extra = {}) {
 }
 function recentIcon(type) { return ({article:'▤',externalArticle:'▤',word:'Aa',grammar:'文',puzzle:'拼'})[type] || '•' }
 function recentTone(type) { return ({article:'blue',word:'mint',grammar:'lilac',puzzle:'gold'})[type] || 'blue' }
-function recentSubtitle(item) { if (item.type === 'word') return (wordCompletion.value[allWords[item.index]?.word] ? '已学会 · ' : '最近浏览 · ') + item.subtitle; if (item.type !== 'puzzle') return item.subtitle; const total = item.puzzleTotal || (puzzleSets[item.index]?.items.length || 0); if (item.puzzleCompleted) return '已完成 · ' + total + ' 句'; return '已完成 ' + (item.puzzleCursor || 0) + ' / ' + total + ' 句' }
+function recentSubtitle(item) { if (item.type === 'word') return (wordCompletion.value[allWords[item.index]?.word] ? '已学完 · ' : '最近浏览 · ') + item.subtitle; if (item.type !== 'puzzle') return item.subtitle; const total = item.puzzleTotal || (puzzleSets[item.index]?.items.length || 0); if (item.puzzleCompleted) return '已完成 · ' + total + ' 句'; return '已完成 ' + (item.puzzleCursor || 0) + ' / ' + total + ' 句' }
 function puzzleProgressPercent(item) { const total = item.puzzleTotal || (puzzleSets[item.index]?.items.length || 1); return Math.max(0, Math.min(100, item.puzzleCompleted ? 100 : (item.puzzleCursor || 0) / total * 100)) }
 function puzzleProgressFor(set) { const saved = puzzleProgress.value[set.id] || {}; return {cursor:Math.min(saved.cursor || 0,set.items.length),completed:Boolean(saved.completed)} }
 function puzzleSourceLabel(set) { const source = articles.find(article => article.id === set.sourceArticleId); return source ? '来自《' + source.translation + '》' : '独立练习' }
@@ -274,8 +277,8 @@ function completeReading() { if (readingCompleted.value) return; const article =
 function backToExternalDirectory() { uni.navigateBack({fail:() => uni.redirectTo({url:'/pages/reading/series?item=' + externalSeriesIndex.value})}) }
 function openArticleWords() { const url = isExternalReading.value ? '/pages/vocab/list?source=external&series=' + externalSeriesIndex.value + '&chapter=' + externalChapterIndex.value : '/pages/vocab/list?article=' + articleIndex.value; uni.navigateTo({url}) }
 function openArticleGrammar(i) { articleGrammarNoteIndex.value = i; go('articlegramdetail') }
-function openWord(i) { wordIndex.value = i; const word = allWords[i] || allWords[0]; trackRecent('word', i, word.word, word.pos + ' ' + word.meaning); go('worddetail') }
-function markWordLearned() { if (isCurrentWordLearned.value) return; wordCompletion.value = {...wordCompletion.value,[currentWord.value.word]:true}; try { uni.setStorageSync('readEnglishWordCompletion',wordCompletion.value); uni.$emit('readEnglishWordCompletionUpdate') } catch (_) {}; trackRecent('word',wordIndex.value,currentWord.value.word,currentWord.value.pos + ' ' + currentWord.value.meaning); toast('已记为学会') }
+function openWord(i) { wordIndex.value = i; scrollTop.value = 1; nextTick(() => { scrollTop.value = 0 }); go('worddetail') }
+function completeWordAfterSpelling(word) { if (spellReturn.value !== 'worddetail') return; if (!wordCompletion.value[word.word]) { wordCompletion.value = {...wordCompletion.value,[word.word]:true}; try { uni.setStorageSync('readEnglishWordCompletion',wordCompletion.value); uni.$emit('readEnglishWordCompletionUpdate') } catch (_) {} } trackRecent('word',wordIndex.value,word.word,word.pos + ' ' + word.meaning) }
 function showPuzzleGuide() { uni.showModal({title:'拼句练习',content:'根据中文意思，点选词块组成英文句子。每完成一句会自动保存进度；想重新练习，可在练习列表点击「从头开始」。',showCancel:false,confirmText:'知道了'}) }
 function openGrammar(i) { grammarIndex.value = i; const item = grammarItems[i] || grammarItems[0]; trackRecent('grammar', i, item.title, item.level + ' · 语法专题'); go('gramdetail') }
 function startQuestions() { questionIndex.value = 0; selectedOption.value = -1; answered.value = false; fillAnswer.value = ''; go('questions') }
@@ -286,8 +289,30 @@ function beginSpelling(from) { spellReturn.value = from; spellWords.value = from
 function setupSpell() { const answer = spellWords.value[spellIndex.value].word.toLowerCase(); spellSlots.value = Array(answer.length).fill(''); const chars = answer.split(''); letterBank.value = [...chars].sort(() => Math.random() - .5); usedLetters.value = []; answered.value = false; isCorrect.value = false }
 function addLetter(i) { if (usedLetters.value.includes(i)) return; const empty = spellSlots.value.indexOf(''); if (empty < 0) return; spellSlots.value[empty] = letterBank.value[i]; usedLetters.value.push(i) }
 function removeLetter(i) { if (answered.value || !spellSlots.value[i]) return; const char = spellSlots.value[i]; const bankIndex = letterBank.value.findIndex((c,j) => c === char && usedLetters.value.includes(j)); if (bankIndex >= 0) usedLetters.value = usedLetters.value.filter(j => j !== bankIndex); spellSlots.value[i] = '' }
-function spellAction() { if (!answered.value) { if (spellSlots.value.includes('')) { toast('请先填完所有字母'); return }; const typed = spellSlots.value.join(''); isCorrect.value = typed === spellWords.value[spellIndex.value].word.toLowerCase(); answered.value = true } else if (spellIndex.value < spellWords.value.length - 1) { spellIndex.value++; setupSpell() } else { toast('拼写练习完成'); const fallbackUrl = spellReturn.value === 'worddetail' ? '/pages/vocab/detail?item=' + wordIndex.value : spellReturn.value === 'articlewordlist' && isExternalReading.value ? '/pages/vocab/list?source=external&series=' + externalSeriesIndex.value + '&chapter=' + externalChapterIndex.value : spellReturn.value === 'articlewordlist' ? '/pages/vocab/list?article=' + sourceArticleIndex.value : '/pages/vocab/list'; uni.navigateBack({fail:() => uni.redirectTo({url:fallbackUrl})}) } }
-function nextWordDetail() { const next = (wordIndex.value + 1) % allWords.length; openWord(next) }
+function spellAction() {
+  if (!answered.value) {
+    if (spellSlots.value.includes('')) { toast('请先填完所有字母'); return }
+    isCorrect.value = spellSlots.value.join('') === spellWords.value[spellIndex.value].word.toLowerCase()
+    answered.value = true
+    if (isCorrect.value) completeWordAfterSpelling(spellWords.value[spellIndex.value])
+    return
+  }
+  if (spellReturn.value === 'worddetail') {
+    if (!isCorrect.value) { setupSpell(); return }
+    if (wordIndex.value >= allWords.length - 1) { uni.reLaunch({url:'/pages/vocab/index'}); return }
+    const nextUrl = '/pages/vocab/detail?item=' + (wordIndex.value + 1)
+    const pages = getCurrentPages()
+    const previous = pages[pages.length - 2]
+    if (previous?.route?.replace(/^\//,'') === 'pages/vocab/detail') {
+      uni.navigateBack({success:() => setTimeout(() => uni.redirectTo({url:nextUrl}), 50),fail:() => uni.redirectTo({url:nextUrl})})
+    } else uni.redirectTo({url:nextUrl})
+    return
+  }
+  if (spellIndex.value < spellWords.value.length - 1) { spellIndex.value++; setupSpell(); return }
+  toast('拼写练习完成')
+  const fallbackUrl = spellReturn.value === 'articlewordlist' && isExternalReading.value ? '/pages/vocab/list?source=external&series=' + externalSeriesIndex.value + '&chapter=' + externalChapterIndex.value : spellReturn.value === 'articlewordlist' ? '/pages/vocab/list?article=' + sourceArticleIndex.value : '/pages/vocab/list'
+  uni.navigateBack({fail:() => uni.redirectTo({url:fallbackUrl})})
+}
 function chooseGrammar(i) { if (grammarAnswered.value) return; selectedOption.value = i }
 function startGrammarQuiz() { selectedOption.value = -1; grammarAnswered.value = false; go('gramquiz') }
 function grammarQuizAction() { if (!grammarAnswered.value) { if (selectedOption.value < 0) { toast('先选择一个答案'); return }; grammarCorrect.value = selectedOption.value === currentGrammar.value.quiz.answer; grammarAnswered.value = true } else { back() } }
@@ -401,4 +426,5 @@ page{height:100%;background:#f4f7fc;color:#303d53;font-family:-apple-system,Blin
 @media (max-width: 360px){.hero-title{font-size:39rpx}.module-desc{font-size:17rpx}.article-art{width:136rpx;height:136rpx}}
 .word-empty{display:flex;flex-direction:column;gap:12rpx;padding:30rpx}.word-empty .inline-link{margin-top:8rpx}.home-page .recent-empty{min-height:0;margin:0 30rpx 16rpx;padding:26rpx;align-items:flex-start;text-align:left;box-shadow:0 6rpx 20rpx #263a5d08}
 .home-page{padding-left:0;padding-right:0}.home-page .section-head{padding-left:30rpx;padding-right:30rpx}.vocab-page .book-card{margin:0 0 20rpx}.vocab-page .section-head{padding-left:0;padding-right:0}
+.learned-tag{background:#e5f4ec;color:#398466}
 </style>
