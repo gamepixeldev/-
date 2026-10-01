@@ -326,6 +326,20 @@ function beginSpelling(from) { spellReturn.value = from; spellWords.value = from
 function setupSpell() { const answer = spellWords.value[spellIndex.value].word.toLowerCase(); spellSlots.value = Array(answer.length).fill(''); const chars = answer.split(''); letterBank.value = [...chars].sort(() => Math.random() - .5); usedLetters.value = []; answered.value = false; isCorrect.value = false; spellChecked.value = false }
 function addLetter(i) { if (usedLetters.value.includes(i) || answered.value) return; const empty = spellSlots.value.indexOf(''); if (empty < 0) return; spellSlots.value[empty] = letterBank.value[i]; usedLetters.value.push(i); spellChecked.value = false }
 function removeLetter(i) { if (answered.value || !spellSlots.value[i]) return; const char = spellSlots.value[i]; const bankIndex = letterBank.value.findIndex((c,j) => c === char && usedLetters.value.includes(j)); if (bankIndex >= 0) usedLetters.value = usedLetters.value.filter(j => j !== bankIndex); spellSlots.value[i] = ''; spellChecked.value = false }
+function finishWordStep(nextUrl) {
+  const pages = getCurrentPages()
+  let sourceIndex = -1
+  for (let i = pages.length - 1; i >= 0; i--) {
+    if (!['pages/vocab/detail','pages/vocab/spell'].includes((pages[i].route || '').replace(/^\//,''))) { sourceIndex = i; break }
+  }
+  const fallbackUrl = nextUrl || '/pages/vocab/index'
+  if (sourceIndex < 0) { uni.reLaunch({url:fallbackUrl}); return }
+  uni.navigateBack({
+    delta:pages.length - 1 - sourceIndex,
+    success:() => { if (nextUrl) setTimeout(() => uni.navigateTo({url:nextUrl}), 120) },
+    fail:() => uni.reLaunch({url:fallbackUrl})
+  })
+}
 function spellAction() {
   if (!answered.value) {
     if (spellSlots.value.includes('')) { toast('请先填完所有字母'); return }
@@ -336,13 +350,7 @@ function spellAction() {
     return
   }
   if (spellReturn.value === 'worddetail') {
-    if (wordIndex.value >= allWords.length - 1) { uni.reLaunch({url:'/pages/vocab/index'}); return }
-    const nextUrl = '/pages/vocab/detail?item=' + (wordIndex.value + 1)
-    const pages = getCurrentPages()
-    const previous = pages[pages.length - 2]
-    if (previous?.route?.replace(/^\//,'') === 'pages/vocab/detail') {
-      uni.navigateBack({success:() => setTimeout(() => uni.redirectTo({url:nextUrl}), 50),fail:() => uni.redirectTo({url:nextUrl})})
-    } else uni.redirectTo({url:nextUrl})
+    finishWordStep(wordIndex.value < allWords.length - 1 ? '/pages/vocab/detail?item=' + (wordIndex.value + 1) : '')
     return
   }
   if (spellIndex.value < spellWords.value.length - 1) { spellIndex.value++; setupSpell(); return }
