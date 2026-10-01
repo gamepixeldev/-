@@ -81,7 +81,7 @@
         <view v-if="currentWordContent.type === 'officialAccount'" class="card source-card"><text class="detail-label">公众号文章</text><text class="card-title">{{ currentWordContent.title || '查看关联的公众号文章' }}</text><text class="card-sub">{{ currentWordContent.summary || '词汇详解内容来自关联的公众号文章。' }}</text><button class="source-button" @tap="openOfficialSource(currentWordContent)">阅读公众号原文</button></view><rich-text v-else class="rich-content card" :nodes="currentWordContent.html" />
         <view class="bottom-action"><button class="primary-button" @tap="beginSpelling('worddetail')">下一步 · 拼写练习</button></view></view>
 
-      <view v-else-if="view === 'spell'" class="page spell-page"><view class="progress-row"><view class="progress-track"><view class="progress-fill" :style="{width: spellProgressPercent + '%'}"></view></view></view><view class="spell-prompt"><text class="eyebrow">根据中文释义拼出单词</text><text class="spell-meaning">{{ spellWords[spellIndex].pos }}　{{ spellWords[spellIndex].meaning }}</text><text class="hint-link" @tap="toast('首字母提示：' + spellWords[spellIndex].word[0])">需要提示？</text></view><view class="card spelling-card"><view class="letter-slots"><view v-for="(letter,i) in spellSlots" :key="i" class="letter-slot" @tap="removeLetter(i)">{{ letter || '' }}</view></view><view class="letter-bank"><button v-for="(letter,i) in letterBank" :key="i" class="letter-key" :disabled="usedLetters.includes(i) || answered" @tap="addLetter(i)">{{ letter }}</button></view><view v-if="answered" class="explanation"><text class="explanation-title">{{ isCorrect ? (spellReturn === 'worddetail' ? '拼写正确，本词已学完！' : '拼写正确！') : '拼写有误，再试一次' }}</text><text class="explanation-text">{{ spellWords[spellIndex].word }}　{{ spellWords[spellIndex].meaning }}</text></view></view><view class="bottom-action"><button class="primary-button" @tap="spellAction">{{ spellActionLabel }}</button></view></view>
+      <view v-else-if="view === 'spell'" class="page spell-page"><view class="progress-row"><view class="progress-track"><view class="progress-fill" :style="{width: spellProgressPercent + '%'}"></view></view></view><view class="spell-prompt"><text class="eyebrow">根据中文释义拼出单词</text><text class="spell-meaning">{{ spellWords[spellIndex].pos }}　{{ spellWords[spellIndex].meaning }}</text><text class="hint-link" @tap="requestAnswerHint('spell')">需要提示？</text></view><view class="card spelling-card"><view class="letter-slots"><view v-for="(letter,i) in spellSlots" :key="i" class="letter-slot" :class="{ 'answer-correct': spellChecked && letter === spellWords[spellIndex].word.toLowerCase()[i], 'answer-wrong': spellChecked && letter !== spellWords[spellIndex].word.toLowerCase()[i] }" @tap="removeLetter(i)">{{ letter || '' }}</view></view><view class="letter-bank"><button v-for="(letter,i) in letterBank" :key="i" class="letter-key" :disabled="usedLetters.includes(i) || answered" @tap="addLetter(i)">{{ letter }}</button></view><view v-if="spellChecked" class="explanation" :class="{ 'feedback-wrong': !isCorrect }"><text class="explanation-title">{{ isCorrect ? (spellReturn === 'worddetail' ? '拼写正确，本词已学完！' : '拼写正确！') : '标红的字母位置不对，调整后再试' }}</text><text v-if="isCorrect" class="explanation-text">{{ spellWords[spellIndex].word }}　{{ spellWords[spellIndex].meaning }}</text></view></view><view class="bottom-action"><button class="primary-button" @tap="spellAction">{{ spellActionLabel }}</button></view></view>
 
       <view v-else-if="view === 'grammar' || view === 'gramlist'" class="page grammar-page">
         <view class="hero-home grammar-home-hero"><view class="eyebrow">GRAMMAR NOTES</view><text class="grammar-hero-title">理解规则，<br/>再把句子说清楚。</text><text class="grammar-hero-sub">选知识点，自由开始学习</text><view class="hero-book grammar-book">文</view></view>
@@ -102,7 +102,7 @@
         <view v-if="articlePuzzleSets.length"><view class="section-head"><text class="section-title">精读文章配套</text><text class="section-note">可选关联文章内容</text></view><view v-for="set in articlePuzzleSets" :key="set.id" class="card puzzle-source-card"><view class="puzzle-source" @tap="startPuzzle(set.setIndex)"><view class="thumb puzzle-thumb">{{ set.icon }}</view><view class="puzzle-source-copy"><text class="card-title">{{ set.title }}</text><text class="card-sub">{{ puzzleSourceLabel(set) }}　·　{{ set.items.length }} 句</text><text v-if="puzzleProgressFor(set).cursor || puzzleProgressFor(set).completed" class="puzzle-set-status">{{ puzzleProgressFor(set).completed ? '已完成全部 ' + set.items.length + ' 句' : '已完成 ' + puzzleProgressFor(set).cursor + ' / ' + set.items.length + ' 句' }}</text></view><text class="arr">›</text></view><view v-if="puzzleProgressFor(set).cursor || puzzleProgressFor(set).completed" class="puzzle-set-actions"><text class="puzzle-set-continue" @tap.stop="startPuzzle(set.setIndex)">{{ puzzleProgressFor(set).completed ? '再练一次' : '继续练习' }}</text><text class="puzzle-set-restart" @tap.stop="startPuzzle(set.setIndex,true)">从头开始</text></view></view></view>
         <view class="section-head"><text class="section-title">独立练习</text><text class="section-note">无需先读文章</text></view><view v-for="set in independentPuzzleSets" :key="set.id" class="card puzzle-source-card"><view class="puzzle-source" @tap="startPuzzle(set.setIndex)"><view class="thumb puzzle-thumb">{{ set.icon }}</view><view class="puzzle-source-copy"><text class="card-title">{{ set.title }}</text><text class="card-sub">{{ set.subtitle }}　·　{{ set.items.length }} 句</text><text v-if="puzzleProgressFor(set).cursor || puzzleProgressFor(set).completed" class="puzzle-set-status">{{ puzzleProgressFor(set).completed ? '已完成全部 ' + set.items.length + ' 句' : '已完成 ' + puzzleProgressFor(set).cursor + ' / ' + set.items.length + ' 句' }}</text></view><text class="arr">›</text></view><view v-if="puzzleProgressFor(set).cursor || puzzleProgressFor(set).completed" class="puzzle-set-actions"><text class="puzzle-set-continue" @tap.stop="startPuzzle(set.setIndex)">{{ puzzleProgressFor(set).completed ? '再练一次' : '继续练习' }}</text><text class="puzzle-set-restart" @tap.stop="startPuzzle(set.setIndex,true)">从头开始</text></view></view>
       </view>
-      <view v-else-if="view === 'puzzleplay'" class="page puzzleplay-page"><view class="progress-row"><view class="progress-track"><view class="progress-fill" :style="{width: ((puzzleIndex + 1) / currentPuzzleSet.items.length * 100) + '%'}"></view></view><text class="muted">{{ puzzleIndex + 1 }} / {{ currentPuzzleSet.items.length }}</text></view><text class="question-type">{{ currentPuzzleSet.title }}</text><text class="puzzle-cn">{{ puzzle.cn }}</text><view class="placed-words"><text v-if="!puzzleWords.length" class="muted">点选下方单词，组成正确句子</text><view v-for="(word,i) in puzzleWords" :key="i" class="word-token chosen" @tap="unpickPuzzle(i)">{{ word }}</view></view><view class="word-bank"><view v-for="(word,i) in shuffledPuzzle" :key="i" class="word-token" :class="{used: usedPuzzle.includes(i)}" @tap="pickPuzzle(i)">{{ word }}</view></view><view v-if="puzzleAnswered" class="explanation"><text class="explanation-title">{{ puzzleCorrect ? '语序正确！' : '参考答案' }}</text><text class="explanation-text">{{ puzzle.answer }}</text></view><view class="bottom-action"><button class="primary-button" @tap="puzzleAction">{{ puzzleAnswered ? (puzzleIndex < currentPuzzleSet.items.length - 1 ? '下一句' : '完成练习') : '检查答案' }}</button></view></view>
+      <view v-else-if="view === 'puzzleplay'" class="page puzzleplay-page"><view class="progress-row"><view class="progress-track"><view class="progress-fill" :style="{width: ((puzzleIndex + (puzzleAnswered ? 1 : 0)) / currentPuzzleSet.items.length * 100) + '%'}"></view></view><text class="muted">{{ puzzleIndex + 1 }} / {{ currentPuzzleSet.items.length }}</text></view><text class="question-type">{{ currentPuzzleSet.title }}</text><text class="puzzle-cn">{{ puzzle.cn }}</text><text class="hint-link puzzle-hint" @tap="requestAnswerHint('puzzle')">需要提示？</text><view class="placed-words"><text v-if="!puzzleWords.length" class="muted">点选下方单词，组成正确句子</text><view v-for="(word,i) in puzzleWords" :key="i" class="word-token chosen" :class="{ 'answer-correct': puzzleChecked && word === puzzle.answer.split(' ')[i], 'answer-wrong': puzzleChecked && word !== puzzle.answer.split(' ')[i] }" @tap="unpickPuzzle(i)">{{ word }}</view></view><view class="word-bank"><view v-for="(word,i) in shuffledPuzzle" :key="i" class="word-token" :class="{used: usedPuzzle.includes(i)}" @tap="pickPuzzle(i)">{{ word }}</view></view><view v-if="puzzleChecked" class="explanation" :class="{ 'feedback-wrong': !puzzleCorrect }"><text class="explanation-title">{{ puzzleCorrect ? '语序正确！' : '标红的词块位置不对，调整后再试' }}</text><text v-if="puzzleCorrect" class="explanation-text">{{ puzzle.answer }}</text></view><view class="bottom-action"><button class="primary-button" @tap="puzzleAction">{{ puzzleAnswered ? (puzzleIndex < currentPuzzleSet.items.length - 1 ? '下一句' : '完成练习') : '检查答案' }}</button></view></view>
 
       <view v-else-if="view === 'recent'" class="page recent-page"><view class="intro-block"><text class="eyebrow">YOUR LEARNING</text><text class="large-title">最近学习</text><text class="muted">各模块分别保存，想学哪项就接着学</text></view><view class="recent-category-tabs"><view v-for="category in recentCategories" :key="category.id" class="recent-category" :class="{active:recentCategory===category.id}" @tap="selectRecentCategory(category.id)"><text>{{ category.label }}</text><text class="recent-count">{{ category.items.length }}</text></view></view><view v-if="visibleRecentItems.length" class="recent-section"><view v-for="item in pagedRecentItems" :key="item.key" class="card recent-entry" @tap="openRecent(item)"><view class="mini-icon" :class="recentTone(item.type)">{{ recentIcon(item.type) }}</view><view class="recent-copy"><text class="card-title">{{ item.title }}</text><text class="card-sub">{{ recentSubtitle(item) }}</text><view v-if="item.type==='puzzle'" class="puzzle-progress-track"><view class="puzzle-progress-fill" :style="{width:puzzleProgressPercent(item)+'%'}"></view></view></view><text v-if="item.type!=='puzzle'" class="chevron">›</text><view v-else class="puzzle-recent-actions"><text class="resume-puzzle" @tap.stop="openRecent(item)">{{ item.puzzleCompleted ? '再练一次' : '继续' }}</text><text class="restart-puzzle" @tap.stop="startPuzzle(item.index,true)">从头开始</text></view></view><view class="recent-load-more"><text v-if="visibleRecentItems.length > pagedRecentItems.length">继续下滑加载更多</text><text v-else>已经到底啦</text></view><text class="clear-history" @tap="clearRecent">清空最近学习记录</text></view><view v-else class="recent-empty"><view class="empty-illustration"><view class="empty-book">▤</view><view class="empty-spark spark-one">✦</view><view class="empty-spark spark-two">✧</view><view class="empty-orbit"></view></view><text class="empty-title">{{ recentEmptyTitle }}</text><text class="empty-description">{{ recentEmptyDescription }}</text><view class="empty-tip"><text class="empty-tip-icon">✦</text><text>学过的内容会自动收录在这里，方便随时接着学习</text></view><button class="empty-action" @tap="go(recentCategory==='reading'?'reading':recentCategory==='grammar'?'grammar':recentCategory==='word'?'vocab':'puzzle')">去{{ recentCategoryLabel }}看看 <text>›</text></button><view class="empty-category-hint"><text>也可以切换上方分类，查看其他学习记录</text></view></view></view>
     </scroll-view>
@@ -114,6 +114,7 @@
 <script setup>
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
 import { articles, externalSeries as externalSeriesData, words, grammar, articleGrammar, puzzleSets as puzzleSetsData, getWordContentSource, getGrammarContentSource } from '../pages/index/learning-data.js'
+import { rewardedAdUnitId } from '../config/rewarded-ad.js'
 
 const props = defineProps({ initialView: { type: String, default: 'home' }, initialIndex: { type: Number, default: 0 }, initialPuzzleIndex: { type: Number, default: 0 }, initialChapter: { type: Number, default: 0 }, initialSource: { type: String, default: 'article' }, initialNote: { type: Number, default: 0 }, sourceArticleIndex: { type: Number, default: -1 }, returnView: { type: String, default: 'vocab' } })
 const view = ref(props.initialView)
@@ -141,6 +142,7 @@ const spellIndex = ref(0)
 const spellReturn = ref(props.returnView)
 const spellWords = ref(props.initialView === 'spell' ? props.returnView === 'worddetail' ? [words[props.initialIndex] || words[0]] : props.returnView === 'articlewordlist' ? (props.initialSource === 'external' ? ((externalSeriesData[props.initialIndex] || externalSeriesData[0]).chapters[props.initialChapter]?.words || []) : ((articles[props.sourceArticleIndex] || articles[0]).words || [])).map(id => words.find(word => word.word === id)).filter(Boolean) : words : words)
 const spellSlots = ref([])
+const spellChecked = ref(false)
 const letterBank = ref([])
 const usedLetters = ref([])
 const grammarAnswered = ref(false)
@@ -150,6 +152,7 @@ const shuffledPuzzle = ref([])
 const usedPuzzle = ref([])
 const puzzleAnswered = ref(false)
 const puzzleCorrect = ref(false)
+const puzzleChecked = ref(false)
 const toastMessage = ref('')
 const tabs = [{id:'home',label:'首页',icon:'⌂'},{id:'reading',label:'精读',icon:'▤'},{id:'grammar',label:'语法',icon:'文'},{id:'vocab',label:'单词',icon:'Aa'},{id:'puzzle',label:'拼句',icon:'拼'}]
 const recentItems = ref(loadRecentItems())
@@ -177,7 +180,7 @@ const currentArticleGrammarNote = computed(() => currentArticleGrammar.value[art
 const articleGrammarContent = computed(() => getGrammarContentSource(currentArticleGrammarNote.value))
 const currentWord = computed(() => allWords[wordIndex.value] || allWords[0])
 const isCurrentWordLearned = computed(() => Boolean(wordCompletion.value[currentWord.value.word]))
-const spellActionLabel = computed(() => !answered.value ? '检查拼写' : spellReturn.value === 'worddetail' ? !isCorrect.value ? '重新拼写' : wordIndex.value < allWords.length - 1 ? '下一个单词' : '完成本轮学习' : spellIndex.value < spellWords.value.length - 1 ? '下一个单词' : '完成练习')
+const spellActionLabel = computed(() => !answered.value ? '检查拼写' : spellReturn.value === 'worddetail' ? wordIndex.value < allWords.length - 1 ? '下一个单词' : '完成本轮学习' : spellIndex.value < spellWords.value.length - 1 ? '下一个单词' : '完成练习')
 const spellProgressPercent = computed(() => spellWords.value.length ? (spellIndex.value + (answered.value && isCorrect.value ? 1 : 0)) / spellWords.value.length * 100 : 0)
 const currentGrammar = computed(() => grammarItems[grammarIndex.value] || grammarItems[0])
 const currentWordContent = computed(() => getWordContentSource(currentWord.value))
@@ -213,6 +216,40 @@ const currentPuzzleSet = computed(() => puzzleSets[puzzleSetIndex.value] || puzz
 const puzzle = computed(() => currentPuzzleSet.value.items[puzzleIndex.value] || currentPuzzleSet.value.items[0])
 
 function toast(message) { toastMessage.value = message; setTimeout(() => { if (toastMessage.value === message) toastMessage.value = '' }, 1800) }
+let rewardedVideoAd = null
+let pendingHint = null
+let hintBusy = false
+let hintPageActive = true
+function hintStillCurrent(hint) { return hintPageActive && (hint.kind === 'spell' ? view.value === 'spell' && spellWords.value[spellIndex.value]?.word === hint.source : view.value === 'puzzleplay' && currentPuzzleSet.value.id === hint.setId && puzzleIndex.value === hint.index) }
+function finishHintAd(res) {
+  const hint = pendingHint
+  pendingHint = null
+  hintBusy = false
+  if (!hint || !hintStillCurrent(hint)) return
+  if (!res?.isEnded) { toast('未完整观看广告，提示未解锁'); return }
+  uni.showModal({title:hint.kind === 'spell' ? '正确拼写' : '正确语序',content:hint.answer,showCancel:false,confirmText:'继续填写'})
+}
+function failHintAd() { if (!pendingHint) return; pendingHint = null; hintBusy = false; if (hintPageActive) uni.showModal({title:'广告暂不可用',content:'广告加载失败，请稍后再试。答案尚未解锁。',showCancel:false,confirmText:'知道了'}) }
+function requestAnswerHint(kind) {
+  if (hintBusy) return
+  const hint = kind === 'spell' ? {kind,source:spellWords.value[spellIndex.value]?.word,answer:spellWords.value[spellIndex.value]?.word} : {kind,setId:currentPuzzleSet.value.id,index:puzzleIndex.value,answer:puzzle.value.answer}
+  if (!hint.answer) return
+  hintBusy = true
+  uni.showModal({title:'观看广告获取提示',content:'需要完整观看一段激励视频广告，才能查看' + (kind === 'spell' ? '正确拼写' : '正确语序') + '。是否观看？',confirmText:'观看广告',cancelText:'暂不观看',success:res => { if (!res.confirm) { hintBusy = false; return } showHintAd(hint) },fail:() => { hintBusy = false }})
+}
+function showHintAd(hint) {
+  if (!rewardedAdUnitId) { hintBusy = false; uni.showModal({title:'广告暂不可用',content:'激励视频广告位尚未配置，暂时无法解锁提示。',showCancel:false,confirmText:'知道了'}); return }
+  if (typeof uni.createRewardedVideoAd !== 'function') { hintBusy = false; uni.showModal({title:'当前环境不支持',content:'激励视频需要在已配置广告位的微信小程序中观看，当前预览环境无法解锁提示。',showCancel:false,confirmText:'知道了'}); return }
+  pendingHint = hint
+  try {
+    if (!rewardedVideoAd) {
+      rewardedVideoAd = uni.createRewardedVideoAd({adUnitId:rewardedAdUnitId})
+      rewardedVideoAd.onClose(finishHintAd)
+      rewardedVideoAd.onError(failHintAd)
+    }
+    Promise.resolve(rewardedVideoAd.show()).catch(async () => { try { await rewardedVideoAd.load(); await rewardedVideoAd.show() } catch (_) { failHintAd() } })
+  } catch (_) { failHintAd() }
+}
 function loadRecentItems() { try { return uni.getStorageSync('readEnglishRecent') || [] } catch (_) { return [] } }
 function loadReadingCompletion() { try { const completed = {...(uni.getStorageSync('readEnglishReadingCompletion') || {})}; let migrated = false; for (const item of loadRecentItems()) { let key = ''; if (item.type === 'article' && articles[item.index]) key = 'article:' + articles[item.index].id; if (item.type === 'externalArticle' && externalSeriesData[item.seriesIndex]?.chapters[item.chapterIndex]) key = 'external:' + externalSeriesData[item.seriesIndex].id + ':' + item.chapterIndex; if (key && !completed[key]) { completed[key] = true; migrated = true } } if (migrated) uni.setStorageSync('readEnglishReadingCompletion', completed); return completed } catch (_) { return {} } }
 function loadWordCompletion() { try { return uni.getStorageSync('readEnglishWordCompletion') || {} } catch (_) { return {} } }
@@ -286,19 +323,19 @@ function chooseOption(i) { if (!answered.value) selectedOption.value = i }
 function optionState(i) { if (!answered.value) return selectedOption.value === i ? 'chosen-option' : ''; if (i === currentQuestion.value.answer) return 'correct-option'; if (i === selectedOption.value) return 'wrong-option'; return '' }
 function questionAction() { if (!answered.value) { if (selectedOption.value < 0 && !fillAnswer.value.trim()) { toast('先选择或填写答案'); return }; const q = currentQuestion.value; isCorrect.value = q.kind === 'choice' ? selectedOption.value === q.answer : fillAnswer.value.trim().toLowerCase() === q.answer.toLowerCase(); answered.value = true } else if (questionIndex.value < currentArticle.value.questions.length - 1) { questionIndex.value++; selectedOption.value = -1; answered.value = false; fillAnswer.value = '' } else { toast('阅读理解完成'); back() } }
 function beginSpelling(from) { spellReturn.value = from; spellWords.value = from === 'worddetail' ? [currentWord.value] : from === 'articlewordlist' ? visibleWordList.value : allWords; spellIndex.value = 0; setupSpell(); go('spell') }
-function setupSpell() { const answer = spellWords.value[spellIndex.value].word.toLowerCase(); spellSlots.value = Array(answer.length).fill(''); const chars = answer.split(''); letterBank.value = [...chars].sort(() => Math.random() - .5); usedLetters.value = []; answered.value = false; isCorrect.value = false }
-function addLetter(i) { if (usedLetters.value.includes(i)) return; const empty = spellSlots.value.indexOf(''); if (empty < 0) return; spellSlots.value[empty] = letterBank.value[i]; usedLetters.value.push(i) }
-function removeLetter(i) { if (answered.value || !spellSlots.value[i]) return; const char = spellSlots.value[i]; const bankIndex = letterBank.value.findIndex((c,j) => c === char && usedLetters.value.includes(j)); if (bankIndex >= 0) usedLetters.value = usedLetters.value.filter(j => j !== bankIndex); spellSlots.value[i] = '' }
+function setupSpell() { const answer = spellWords.value[spellIndex.value].word.toLowerCase(); spellSlots.value = Array(answer.length).fill(''); const chars = answer.split(''); letterBank.value = [...chars].sort(() => Math.random() - .5); usedLetters.value = []; answered.value = false; isCorrect.value = false; spellChecked.value = false }
+function addLetter(i) { if (usedLetters.value.includes(i) || answered.value) return; const empty = spellSlots.value.indexOf(''); if (empty < 0) return; spellSlots.value[empty] = letterBank.value[i]; usedLetters.value.push(i); spellChecked.value = false }
+function removeLetter(i) { if (answered.value || !spellSlots.value[i]) return; const char = spellSlots.value[i]; const bankIndex = letterBank.value.findIndex((c,j) => c === char && usedLetters.value.includes(j)); if (bankIndex >= 0) usedLetters.value = usedLetters.value.filter(j => j !== bankIndex); spellSlots.value[i] = ''; spellChecked.value = false }
 function spellAction() {
   if (!answered.value) {
     if (spellSlots.value.includes('')) { toast('请先填完所有字母'); return }
     isCorrect.value = spellSlots.value.join('') === spellWords.value[spellIndex.value].word.toLowerCase()
-    answered.value = true
+    spellChecked.value = true
+    answered.value = isCorrect.value
     if (isCorrect.value) completeWordAfterSpelling(spellWords.value[spellIndex.value])
     return
   }
   if (spellReturn.value === 'worddetail') {
-    if (!isCorrect.value) { setupSpell(); return }
     if (wordIndex.value >= allWords.length - 1) { uni.reLaunch({url:'/pages/vocab/index'}); return }
     const nextUrl = '/pages/vocab/detail?item=' + (wordIndex.value + 1)
     const pages = getCurrentPages()
@@ -316,16 +353,16 @@ function spellAction() {
 function chooseGrammar(i) { if (grammarAnswered.value) return; selectedOption.value = i }
 function startGrammarQuiz() { selectedOption.value = -1; grammarAnswered.value = false; go('gramquiz') }
 function grammarQuizAction() { if (!grammarAnswered.value) { if (selectedOption.value < 0) { toast('先选择一个答案'); return }; grammarCorrect.value = selectedOption.value === currentGrammar.value.quiz.answer; grammarAnswered.value = true } else { back() } }
-function pickPuzzle(i) { if (usedPuzzle.value.includes(i) || puzzleAnswered.value) return; puzzleWords.value.push(shuffledPuzzle.value[i]); usedPuzzle.value.push(i) }
-function unpickPuzzle(i) { if (puzzleAnswered.value) return; const word = puzzleWords.value[i]; puzzleWords.value.splice(i,1); const bankIndex = usedPuzzle.value.find(j => shuffledPuzzle.value[j] === word); if (bankIndex !== undefined) usedPuzzle.value = usedPuzzle.value.filter(j => j !== bankIndex) }
+function pickPuzzle(i) { if (usedPuzzle.value.includes(i) || puzzleAnswered.value) return; puzzleWords.value.push(shuffledPuzzle.value[i]); usedPuzzle.value.push(i); puzzleChecked.value = false }
+function unpickPuzzle(i) { if (puzzleAnswered.value) return; const word = puzzleWords.value[i]; puzzleWords.value.splice(i,1); const bankIndex = usedPuzzle.value.find(j => shuffledPuzzle.value[j] === word); if (bankIndex !== undefined) usedPuzzle.value = usedPuzzle.value.filter(j => j !== bankIndex); puzzleChecked.value = false }
 function savePuzzleProgress(setIndex, cursor, completed = false) { const set = puzzleSets[setIndex]; if (!set) return; const nextProgress = {...puzzleProgress.value,[set.id]:{cursor,completed,total:set.items.length}}; puzzleProgress.value = nextProgress; try { uni.setStorageSync('readEnglishPuzzleProgress',nextProgress); uni.$emit('readEnglishPuzzleProgressUpdate') } catch (_) {}; trackRecent('puzzle',setIndex,set.title,set.subtitle + ' · 拼句练习',{puzzleCursor:cursor,puzzleTotal:set.items.length,puzzleCompleted:completed}) }
 function startPuzzle(i, fromStart = false) { puzzleSetIndex.value = ((i % puzzleSets.length) + puzzleSets.length) % puzzleSets.length; const set = puzzleSets[puzzleSetIndex.value]; try { puzzleProgress.value = uni.getStorageSync('readEnglishPuzzleProgress') || {} } catch (_) {}; const saved = puzzleProgress.value[set.id] || {cursor:0,completed:false}; const cursor = fromStart || saved.completed ? 0 : Math.min(saved.cursor || 0,set.items.length - 1); puzzleIndex.value = cursor; savePuzzleProgress(puzzleSetIndex.value,cursor,false); initPuzzle(); go('puzzleplay') }
-function puzzleAction() { if (puzzleAnswered.value) { if (puzzleIndex.value < currentPuzzleSet.value.items.length - 1) { puzzleIndex.value++; initPuzzle() } else { toast('这组练习完成'); back() }; return }; if (puzzleWords.value.length !== shuffledPuzzle.value.length) { toast('先把所有单词拼完'); return }; puzzleCorrect.value = puzzleWords.value.join(' ') === puzzle.value.answer; puzzleAnswered.value = true; const nextCursor = puzzleIndex.value + 1; savePuzzleProgress(puzzleSetIndex.value,nextCursor,nextCursor === currentPuzzleSet.value.items.length) }
-function initPuzzle() { shuffledPuzzle.value = puzzle.value.answer.split(' ').sort(() => Math.random() - .5); puzzleWords.value = []; usedPuzzle.value = []; puzzleAnswered.value = false }
+function puzzleAction() { if (puzzleAnswered.value) { if (puzzleIndex.value < currentPuzzleSet.value.items.length - 1) { puzzleIndex.value++; initPuzzle() } else { toast('这组练习完成'); back() }; return }; if (puzzleWords.value.length !== shuffledPuzzle.value.length) { toast('先把所有单词拼完'); return }; puzzleCorrect.value = puzzleWords.value.join(' ') === puzzle.value.answer; puzzleChecked.value = true; if (!puzzleCorrect.value) return; puzzleAnswered.value = true; const nextCursor = puzzleIndex.value + 1; savePuzzleProgress(puzzleSetIndex.value,nextCursor,nextCursor === currentPuzzleSet.value.items.length) }
+function initPuzzle() { shuffledPuzzle.value = puzzle.value.answer.split(' ').sort(() => Math.random() - .5); puzzleWords.value = []; usedPuzzle.value = []; puzzleAnswered.value = false; puzzleChecked.value = false; puzzleCorrect.value = false }
 if (props.initialView === 'spell') setupSpell()
 else initPuzzle()
-onMounted(() => { uni.$on('readEnglishRecentUpdate', syncRecentItems); uni.$on('readEnglishReadingCompletionUpdate', syncReadingCompletion); uni.$on('readEnglishWordCompletionUpdate', syncWordCompletion); uni.$on('readEnglishPuzzleProgressUpdate', syncPuzzleProgress) })
-onUnmounted(() => { uni.$off('readEnglishRecentUpdate', syncRecentItems); uni.$off('readEnglishReadingCompletionUpdate', syncReadingCompletion); uni.$off('readEnglishWordCompletionUpdate', syncWordCompletion); uni.$off('readEnglishPuzzleProgressUpdate', syncPuzzleProgress) })
+onMounted(() => { hintPageActive = true; uni.$on('readEnglishRecentUpdate', syncRecentItems); uni.$on('readEnglishReadingCompletionUpdate', syncReadingCompletion); uni.$on('readEnglishWordCompletionUpdate', syncWordCompletion); uni.$on('readEnglishPuzzleProgressUpdate', syncPuzzleProgress) })
+onUnmounted(() => { hintPageActive = false; pendingHint = null; uni.$off('readEnglishRecentUpdate', syncRecentItems); uni.$off('readEnglishReadingCompletionUpdate', syncReadingCompletion); uni.$off('readEnglishWordCompletionUpdate', syncWordCompletion); uni.$off('readEnglishPuzzleProgressUpdate', syncPuzzleProgress) })
 </script>
 
 <style>
@@ -427,4 +464,5 @@ page{height:100%;background:#f4f7fc;color:#303d53;font-family:-apple-system,Blin
 .word-empty{display:flex;flex-direction:column;gap:12rpx;padding:30rpx}.word-empty .inline-link{margin-top:8rpx}.home-page .recent-empty{min-height:0;margin:0 30rpx 16rpx;padding:26rpx;align-items:flex-start;text-align:left;box-shadow:0 6rpx 20rpx #263a5d08}
 .home-page{padding-left:0;padding-right:0}.home-page .section-head{padding-left:30rpx;padding-right:30rpx}.vocab-page .book-card{margin:0 0 20rpx}.vocab-page .section-head{padding-left:0;padding-right:0}
 .learned-tag{background:#e5f4ec;color:#398466}
+.letter-slot.answer-correct{color:#238564;border-color:#51bd92;background:#e7f7ee;border-radius:10rpx 10rpx 0 0}.letter-slot.answer-wrong{color:#b93f45;border-color:#e16d74;background:#fff0ef;border-radius:10rpx 10rpx 0 0}.word-token.chosen.answer-correct{color:#238564;background:#dff3e8;box-shadow:inset 0 0 0 2rpx #72cba6}.word-token.chosen.answer-wrong{color:#b93f45;background:#ffeded;box-shadow:inset 0 0 0 2rpx #e99599}.explanation.feedback-wrong{background:#fff0ef}.explanation.feedback-wrong .explanation-title{color:#b84b51}.puzzle-hint{display:block;margin:-12rpx 0 22rpx;text-align:right}
 </style>
