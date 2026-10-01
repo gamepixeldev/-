@@ -125,7 +125,6 @@ const readingSource = ref(props.initialSource)
 const externalSeriesIndex = ref(['externalchapters','externalchapter'].includes(props.initialView) || props.initialSource === 'external' ? props.initialIndex : 0)
 const externalChapterIndex = ref(props.initialChapter)
 const showExternalTranslations = ref(true)
-const readingCompleted = ref(false)
 const wordIndex = ref(props.initialIndex)
 const grammarIndex = ref(props.initialIndex)
 const articleGrammarNoteIndex = ref(props.initialNote)
@@ -152,6 +151,7 @@ const selectedSentence = ref('')
 const toastMessage = ref('')
 const tabs = [{id:'home',label:'首页',icon:'⌂'},{id:'reading',label:'精读',icon:'▤'},{id:'grammar',label:'语法',icon:'文'},{id:'vocab',label:'单词',icon:'Aa'},{id:'puzzle',label:'拼句',icon:'拼'}]
 const recentItems = ref(loadRecentItems())
+const readingCompleted = computed(() => recentItems.value.some(item => isExternalReading.value ? item.type === 'externalArticle' && item.seriesIndex === externalSeriesIndex.value && item.chapterIndex === externalChapterIndex.value : item.type === 'article' && item.index === articleIndex.value))
 const recentCategory = ref('reading')
 const puzzleProgress = ref(loadPuzzleProgress())
 const allWords = words
@@ -251,11 +251,11 @@ function go(next) {
   scrollTop.value = 0
 }
 function back() { if (viewStack.value.length) { view.value = viewStack.value.pop(); if (['home','reading','vocab','grammar','puzzle'].includes(view.value)) activeTab.value = view.value } else if (props.initialView !== 'home') { uni.navigateBack({ fail: () => uni.redirectTo({url:'/pages/index/index'}) }); return } else { view.value = 'home'; activeTab.value = 'home' }; scrollTop.value = 0 }
-function openArticle(i) { articleIndex.value = i; readingSource.value = 'article'; sourceArticleIndex.value = -1; readingCompleted.value = false; questionIndex.value = 0; selectedSentence.value = ''; go('article') }
+function openArticle(i) { articleIndex.value = i; readingSource.value = 'article'; sourceArticleIndex.value = -1; questionIndex.value = 0; selectedSentence.value = ''; go('article') }
 function openExternalSeries(i) { uni.navigateTo({url:'/pages/reading/series?item=' + i}) }
 function openExternalChapter(i, seriesIndex = externalSeriesIndex.value) { uni.navigateTo({url:'/pages/reading/chapter?item=' + seriesIndex + '&chapter=' + i}) }
 function goExternalChapter(i) { if (i < 0 || i >= currentExternalSeries.value.chapters.length) return; externalChapterIndex.value = i; scrollTop.value = 0 }
-function completeReading() { if (readingCompleted.value) return; const article = currentArticle.value; if (isExternalReading.value) trackRecent('externalArticle', externalChapterIndex.value, article.title, currentExternalSeries.value.translation + ' · 外刊阅读', {seriesIndex:externalSeriesIndex.value,chapterIndex:externalChapterIndex.value}); else trackRecent('article', articleIndex.value, article.title, article.translation + ' · 精读文章'); readingCompleted.value = true; toast('阅读完成，已加入最近学习') }
+function completeReading() { if (readingCompleted.value) return; const article = currentArticle.value; if (isExternalReading.value) trackRecent('externalArticle', externalChapterIndex.value, article.title, currentExternalSeries.value.translation + ' · 外刊阅读', {seriesIndex:externalSeriesIndex.value,chapterIndex:externalChapterIndex.value}); else trackRecent('article', articleIndex.value, article.title, article.translation + ' · 精读文章'); toast('阅读完成，已加入最近学习') }
 function backToExternalDirectory() { uni.navigateBack({fail:() => uni.redirectTo({url:'/pages/reading/series?item=' + externalSeriesIndex.value})}) }
 function openArticleWords() { const url = isExternalReading.value ? '/pages/vocab/list?source=external&series=' + externalSeriesIndex.value + '&chapter=' + externalChapterIndex.value : '/pages/vocab/list?article=' + articleIndex.value; uni.navigateTo({url}) }
 function openArticleGrammar(i) { articleGrammarNoteIndex.value = i; go('articlegramdetail') }
