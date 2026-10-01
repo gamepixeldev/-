@@ -203,6 +203,7 @@ function toast(message) { toastMessage.value = message; setTimeout(() => { if (t
 function loadRecentItems() { try { return uni.getStorageSync('readEnglishRecent') || [] } catch (_) { return [] } }
 function loadPuzzleProgress() { try { return uni.getStorageSync('readEnglishPuzzleProgress') || {} } catch (_) { return {} } }
 function syncRecentItems() { recentItems.value = loadRecentItems() }
+function syncPuzzleProgress() { puzzleProgress.value = loadPuzzleProgress() }
 function trackRecent(type, index, title, subtitle, extra = {}) {
   const key = extra.seriesIndex !== undefined ? type + ':' + extra.seriesIndex + ':' + extra.chapterIndex : type + ':' + index
   const item = {key, type, index, title, subtitle, time:Date.now(), ...extra}
@@ -276,14 +277,14 @@ function startGrammarQuiz() { selectedOption.value = -1; grammarAnswered.value =
 function grammarQuizAction() { if (!grammarAnswered.value) { if (selectedOption.value < 0) { toast('先选择一个答案'); return }; grammarCorrect.value = selectedOption.value === currentGrammar.value.quiz.answer; grammarAnswered.value = true } else { back() } }
 function pickPuzzle(i) { if (usedPuzzle.value.includes(i) || puzzleAnswered.value) return; puzzleWords.value.push(shuffledPuzzle.value[i]); usedPuzzle.value.push(i) }
 function unpickPuzzle(i) { if (puzzleAnswered.value) return; const word = puzzleWords.value[i]; puzzleWords.value.splice(i,1); const bankIndex = usedPuzzle.value.find(j => shuffledPuzzle.value[j] === word); if (bankIndex !== undefined) usedPuzzle.value = usedPuzzle.value.filter(j => j !== bankIndex) }
-function savePuzzleProgress(setIndex, cursor, completed = false) { const set = puzzleSets[setIndex]; if (!set) return; const nextProgress = {...puzzleProgress.value,[set.id]:{cursor,completed,total:set.items.length}}; puzzleProgress.value = nextProgress; try { uni.setStorageSync('readEnglishPuzzleProgress',nextProgress) } catch (_) {}; trackRecent('puzzle',setIndex,set.title,set.subtitle + ' · 拼句练习',{puzzleCursor:cursor,puzzleTotal:set.items.length,puzzleCompleted:completed}) }
+function savePuzzleProgress(setIndex, cursor, completed = false) { const set = puzzleSets[setIndex]; if (!set) return; const nextProgress = {...puzzleProgress.value,[set.id]:{cursor,completed,total:set.items.length}}; puzzleProgress.value = nextProgress; try { uni.setStorageSync('readEnglishPuzzleProgress',nextProgress); uni.$emit('readEnglishPuzzleProgressUpdate') } catch (_) {}; trackRecent('puzzle',setIndex,set.title,set.subtitle + ' · 拼句练习',{puzzleCursor:cursor,puzzleTotal:set.items.length,puzzleCompleted:completed}) }
 function startPuzzle(i, fromStart = false) { puzzleSetIndex.value = ((i % puzzleSets.length) + puzzleSets.length) % puzzleSets.length; const set = puzzleSets[puzzleSetIndex.value]; try { puzzleProgress.value = uni.getStorageSync('readEnglishPuzzleProgress') || {} } catch (_) {}; const saved = puzzleProgress.value[set.id] || {cursor:0,completed:false}; const cursor = fromStart || saved.completed ? 0 : Math.min(saved.cursor || 0,set.items.length - 1); puzzleIndex.value = cursor; savePuzzleProgress(puzzleSetIndex.value,cursor,false); initPuzzle(); go('puzzleplay') }
-function puzzleAction() { if (puzzleAnswered.value) { if (puzzleIndex.value < currentPuzzleSet.value.items.length - 1) { puzzleIndex.value++; savePuzzleProgress(puzzleSetIndex.value,puzzleIndex.value,false); initPuzzle() } else { savePuzzleProgress(puzzleSetIndex.value,currentPuzzleSet.value.items.length,true); toast('这组练习完成'); back() }; return }; if (!puzzleWords.value.length) { toast('先点选下方单词'); return }; puzzleCorrect.value = puzzleWords.value.join(' ') === puzzle.value.answer; puzzleAnswered.value = true; savePuzzleProgress(puzzleSetIndex.value,puzzleIndex.value,false) }
+function puzzleAction() { if (puzzleAnswered.value) { if (puzzleIndex.value < currentPuzzleSet.value.items.length - 1) { puzzleIndex.value++; initPuzzle() } else { toast('这组练习完成'); back() }; return }; if (puzzleWords.value.length !== shuffledPuzzle.value.length) { toast('先把所有单词拼完'); return }; puzzleCorrect.value = puzzleWords.value.join(' ') === puzzle.value.answer; puzzleAnswered.value = true; const nextCursor = puzzleIndex.value + 1; savePuzzleProgress(puzzleSetIndex.value,nextCursor,nextCursor === currentPuzzleSet.value.items.length) }
 function initPuzzle() { shuffledPuzzle.value = puzzle.value.answer.split(' ').sort(() => Math.random() - .5); puzzleWords.value = []; usedPuzzle.value = []; puzzleAnswered.value = false }
 if (props.initialView === 'spell') setupSpell()
 else initPuzzle()
-onMounted(() => uni.$on('readEnglishRecentUpdate', syncRecentItems))
-onUnmounted(() => uni.$off('readEnglishRecentUpdate', syncRecentItems))
+onMounted(() => { uni.$on('readEnglishRecentUpdate', syncRecentItems); uni.$on('readEnglishPuzzleProgressUpdate', syncPuzzleProgress) })
+onUnmounted(() => { uni.$off('readEnglishRecentUpdate', syncRecentItems); uni.$off('readEnglishPuzzleProgressUpdate', syncPuzzleProgress) })
 </script>
 
 <style>
@@ -364,7 +365,7 @@ page{height:100%;background:#f4f7fc;color:#303d53;font-family:-apple-system,Blin
 .thumb.theme-blue{background:#e2edff}.thumb.theme-green{background:#e5f5ed}.thumb.puzzle-thumb{background:#fff0d7;color:#bc8a3e;font-size:31rpx}
 .recent.puzzle-source .thumb{border-radius:26rpx}
 .puzzle-source{display:flex;align-items:center;gap:20rpx;margin:0;padding:22rpx 20rpx;border-bottom:1rpx solid #eef1f5;border-radius:0}
-.puzzle-source-card{padding:0;overflow:hidden}.puzzle-set-status{font-size:18rpx;color:#66a88d}.puzzle-set-actions{display:flex;align-items:center;justify-content:flex-end;gap:14rpx;padding:10rpx 20rpx 17rpx}.puzzle-set-actions text{padding:10rpx 17rpx;border-radius:18rpx;font-size:18rpx}.puzzle-set-continue{background:#edf5ff;color:#3978ef;font-weight:700}.puzzle-set-restart{color:#8e99a8;background:#f5f6f8}
+.puzzle-source-card{margin:0 30rpx 18rpx;padding:0;overflow:hidden}.puzzle-set-status{font-size:18rpx;color:#66a88d}.puzzle-set-actions{display:flex;align-items:center;justify-content:flex-end;gap:14rpx;padding:10rpx 20rpx 17rpx}.puzzle-set-actions text{padding:10rpx 17rpx;border-radius:18rpx;font-size:18rpx}.puzzle-set-continue{background:#edf5ff;color:#3978ef;font-weight:700}.puzzle-set-restart{color:#8e99a8;background:#f5f6f8}
 .puzzle-source-copy{flex:1;min-width:0;display:flex;flex-direction:column;gap:8rpx}
 .arr{flex:none;margin-left:auto;color:#aab5c4;font-size:34rpx;line-height:1}
 .puzzle-thumb{background:#fff0d7;color:#bc8a3e;font-size:31rpx}
