@@ -122,9 +122,9 @@ const escapeEnglishHTML = value => escapeContentHTML(value).replace(/([’'])(?=
 
 export function getWordContentSource(word) {
   if (word.contentSource) return word.contentSource
-  const examples = (word.examples || []).map(example => `<p><strong>${escapeEnglishHTML(example.en)}</strong><br/>${escapeContentHTML(example.cn)}</p>`).join('')
+  const examples = (word.examples || []).map(example => `<blockquote><strong>${escapeEnglishHTML(example.en)}</strong><br/>${escapeContentHTML(example.cn)}</blockquote>`).join('')
   const forms = word.forms ? `<h3>词形变化</h3><p>${escapeContentHTML(word.forms)}</p>` : ''
-  return {type:'richtext',html:`<h3>词义辨析</h3><p>${escapeContentHTML(word.note)}</p>${forms}<h3>例句</h3>${examples}<h3>记忆一下</h3><p>${escapeContentHTML(word.memory)}</p>`}
+  return {type:'richtext',html:`<h3>词义与用法</h3><p>${escapeContentHTML(word.note)}</p>${forms}<h3>例句</h3>${examples}<h3>记忆提示</h3><p>${escapeContentHTML(word.memory)}</p>`}
 }
 
 export function getGrammarContentSource(item) {
