@@ -1,8 +1,6 @@
 <template>
-  <view class="app-shell">
-    <view class="status-spacer"></view>
-    <view class="topbar"><view class="back-hit back-placeholder"></view><view class="top-title">拼句练习</view><view class="top-action" @tap="showGuide">ⓘ</view></view>
-    <scroll-view class="page-scroll" scroll-y :scroll-top="scrollTop" :show-scrollbar="false" lower-threshold="100" @scrolltolower="loadMore">
+  <StudyLayout title="拼句练习" :show-back="false" show-tabs active-tab="puzzle" :scroll-top="scrollTop" @load-more="loadMore">
+    <template #action><text @tap="showGuide">ⓘ</text></template>
       <view class="page puzzle-page">
         <view class="hero-home puzzle-home-hero"><view class="eyebrow">SENTENCE PUZZLE</view><text class="puzzle-hero-title">读懂中文，<br/>重新排好英文。</text><view class="hero-book puzzle-book">拼</view></view>
         <view v-if="resumablePuzzle" class="puzzle-resume-card" @tap="startPuzzle(resumablePuzzle.setIndex)"><view class="puzzle-resume-top"><text>继续上次练习</text><text>{{ resumablePuzzle.cursor }} / {{ resumablePuzzle.items.length }} 句</text></view><text class="puzzle-resume-title">{{ resumablePuzzle.title }}</text><view class="puzzle-resume-bottom"><view class="puzzle-resume-track"><view :style="{width: resumablePuzzle.cursor / resumablePuzzle.items.length * 100 + '%'}"></view></view><text>继续　›</text></view></view>
@@ -11,9 +9,7 @@
         <view v-for="set in pagedPuzzleSets" :key="set.id" class="card puzzle-source-card"><view class="puzzle-source" @tap="startPuzzle(set.setIndex)"><view class="thumb puzzle-thumb">{{ set.icon }}</view><view class="puzzle-source-copy"><text class="card-title">{{ set.title }}</text><text class="card-sub">{{ set.sourceArticleId ? sourceLabel(set) : set.subtitle }}　·　{{ set.items.length }} 句</text><text v-if="progressFor(set).cursor || progressFor(set).completed" class="puzzle-set-status">{{ progressFor(set).completed ? '已完成' : '已完成 ' + progressFor(set).cursor + ' / ' + set.items.length + ' 句' }}</text></view><text class="arr">›</text></view><view v-if="progressFor(set).cursor || progressFor(set).completed" class="puzzle-card-bottom"><view class="puzzle-card-track"><view :style="{width: (progressFor(set).completed ? 100 : progressFor(set).cursor / set.items.length * 100) + '%'}"></view></view><text class="puzzle-set-restart" @tap.stop="startPuzzle(set.setIndex,true)">从头开始</text></view></view>
         <view v-if="pagedPuzzleSets.length < visiblePuzzleSets.length" class="puzzle-load-state">下滑加载更多</view>
       </view>
-    </scroll-view>
-    <view class="tabbar"><view v-for="tab in tabs" :key="tab.id" class="tab-item" :class="{active:tab.id === 'puzzle'}" @tap="openTab(tab)"><text class="tab-icon">{{ tab.icon }}</text><text>{{ tab.label }}</text></view></view>
-  </view>
+  </StudyLayout>
 </template>
 
 <script setup>
@@ -21,8 +17,8 @@ import { computed, nextTick, ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { articles, puzzleSets } from '../index/learning-data.js'
 import { loadPuzzleProgress, loadRecentItems, savePuzzleProgress, saveRecentItem } from '../../services/study-records.js'
+import StudyLayout from '../../components/StudyLayout.vue'
 
-const tabs = [{id:'home',label:'首页',icon:'⌂',url:'/pages/index/index'},{id:'reading',label:'精读',icon:'▤',url:'/pages/reading/index'},{id:'grammar',label:'语法',icon:'文',url:'/pages/grammar/index'},{id:'vocab',label:'单词',icon:'Aa',url:'/pages/vocab/index'},{id:'puzzle',label:'拼句',icon:'拼',url:'/pages/puzzle/index'}]
 const puzzleFilters = [{id:'all',label:'全部'},{id:'independent',label:'独立练习'},{id:'article',label:'精读配套'}]
 const puzzleFilter = ref('all')
 const pageSize = ref(6)
@@ -55,5 +51,4 @@ function startPuzzle(index, fromStart = false) {
   uni.navigateTo({url:'/pages/puzzle/play?item=' + index + '&sentence=' + cursor})
 }
 function showGuide() { uni.showModal({title:'拼句练习',content:'根据中文意思，点选词块组成英文句子。每完成一句会自动保存进度；想重新练习，可在练习列表点击「从头开始」。',showCancel:false,confirmText:'知道了'}) }
-function openTab(tab) { if (tab.id !== 'puzzle') uni.navigateTo({url:tab.url}) }
 </script>
