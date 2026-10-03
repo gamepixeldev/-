@@ -11,6 +11,7 @@
     <scroll-view class="page-scroll" scroll-y :scroll-top="scrollTop" :show-scrollbar="false" lower-threshold="100" @scrolltolower="$emit('load-more')">
       <slot />
     </scroll-view>
+    <slot name="fixed-action" />
     <view v-if="showTabs" class="tabbar">
       <view v-for="tab in tabs" :key="tab.id" class="tab-item" :class="{active:activeTab === tab.id}" @tap="openTab(tab)"><text class="tab-icon">{{ tab.icon }}</text><text>{{ tab.label }}</text></view>
     </view>
