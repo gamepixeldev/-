@@ -15,20 +15,17 @@
 <script setup>
 import { computed, onUnmounted, ref } from 'vue'
 import StudyLayout from './StudyLayout.vue'
-import { articles, externalSeries } from '../pages/index/learning-data.js'
+import { resolveReadingContext } from '../features/reading/reading-context.js'
 import { loadReadingCompletion, loadRecentItems, saveReadingCompletion, saveRecentItem } from '../services/study-records.js'
 
 const props = defineProps({source:{type:String,default:'article'},item:{type:Number,default:0},chapter:{type:Number,default:0}})
-const isExternal = computed(() => props.source === 'external')
-const seriesIndex = computed(() => externalSeries[props.item] ? props.item : 0)
-const series = computed(() => externalSeries[seriesIndex.value] || externalSeries[0])
-const chapterIndex = computed(() => Math.max(0, Math.min(props.chapter,series.value.chapters.length - 1)))
-const articleIndex = computed(() => articles[props.item] ? props.item : 0)
-const article = computed(() => {
-  if (!isExternal.value) return articles[articleIndex.value]
-  const chapter = series.value.chapters[chapterIndex.value]
-  return {id:'external-' + series.value.id + '-' + chapterIndex.value,title:chapter.title,translation:series.value.translation,level:series.value.level,minutes:chapter.minutes,icon:series.value.icon,theme:series.value.theme,paragraphs:chapter.paragraphs,translations:chapter.translations,words:chapter.words || [],questions:chapter.questions || []}
-})
+const context = computed(() => resolveReadingContext(props.source, props.item, props.chapter))
+const isExternal = computed(() => context.value.isExternal)
+const seriesIndex = computed(() => context.value.seriesIndex)
+const series = computed(() => context.value.series)
+const chapterIndex = computed(() => context.value.chapterIndex)
+const articleIndex = computed(() => context.value.articleIndex)
+const article = computed(() => context.value.article)
 const completion = ref(loadReadingCompletion())
 const completionKey = computed(() => isExternal.value ? 'external:' + series.value.id + ':' + chapterIndex.value : 'article:' + article.value.id)
 const readingCompleted = computed(() => Boolean(completion.value[completionKey.value]))

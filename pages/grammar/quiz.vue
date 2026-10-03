@@ -1,5 +1,5 @@
 <template>
-  <StudyLayout v-if="ready" title="语法练习" :toast="toastMessage">
+  <StudyLayout v-if="ready" title="语法练习" immersive :toast="toastMessage">
     <view class="page question-page"><view class="progress-row"><view class="progress-track"><view class="progress-fill" :style="{width: answered ? '100%' : '35%'}"></view></view><text class="muted">练习</text></view><text class="question-type">语法小练习</text><text class="question-title">{{ currentGrammar.quiz.prompt }}</text><view class="option-list"><view v-for="(option,i) in currentGrammar.quiz.options" :key="i" class="option-card" :class="optionState(i)" @tap="choose(i)"><text class="option-letter">{{ String.fromCharCode(65+i) }}</text><text>{{ option }}</text><text v-if="answered && i === currentGrammar.quiz.answer" class="option-check">✓</text></view></view><view v-if="answered" class="explanation"><text class="explanation-title">{{ correct ? '回答正确' : '看看解析' }}</text><text class="explanation-text">{{ currentGrammar.quiz.explanation }}</text></view><view class="bottom-action"><button class="primary-button" @tap="checkOrReturn">{{ answered ? '返回语法解析' : '确认答案' }}</button></view></view>
   </StudyLayout>
 </template>
