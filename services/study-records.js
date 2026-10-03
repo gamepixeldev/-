@@ -36,6 +36,12 @@ export function loadReadingCompletion() {
   } catch (_) { return {} }
 }
 
+export function saveReadingCompletion(current, key) {
+  const next = { ...current, [key]: true }
+  try { uni.setStorageSync(keys.reading, next); uni.$emit('readEnglishReadingCompletionUpdate') } catch (_) {}
+  return next
+}
+
 export function saveRecentItem(currentItems, type, index, title, subtitle, extra = {}) {
   const key = extra.seriesIndex !== undefined ? type + ':' + extra.seriesIndex + ':' + extra.chapterIndex : type + ':' + index
   const item = { key, type, index, title, subtitle, time: Date.now(), ...extra }
