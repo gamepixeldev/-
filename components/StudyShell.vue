@@ -127,6 +127,7 @@ import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
 import { articles, externalSeries as externalSeriesData, words, grammar, puzzleSets as puzzleSetsData, getWordContentSource, getGrammarContentSource, getArticleGrammarContentSource } from '../pages/index/learning-data.js'
 import { rewardedAdUnitId } from '../config/rewarded-ad.js'
 import { dailyWordIndexes, localDayKey } from '../config/daily-words.js'
+import { loadRecentItems, loadReadingCompletion, loadWordCompletion, loadFavoriteWords, loadDailyWordProgress, loadPuzzleProgress, saveRecentItem, savePuzzleProgress as persistPuzzleProgress } from '../services/study-records.js'
 
 const props = defineProps({ initialView: { type: String, default: 'home' }, initialIndex: { type: Number, default: 0 }, initialPuzzleIndex: { type: Number, default: 0 }, initialChapter: { type: Number, default: 0 }, initialSource: { type: String, default: 'article' }, initialSeriesIndex: { type: Number, default: -1 }, sourceArticleIndex: { type: Number, default: -1 }, returnView: { type: String, default: 'vocab' }, wordReadOnly: { type: Boolean, default: false }, initialDailyStudy: { type: Boolean, default: false }, initialStudyDate: { type: String, default: '' } })
 const view = ref(props.initialView)
@@ -276,12 +277,6 @@ function showHintAd(hint) {
     Promise.resolve(rewardedVideoAd.show()).catch(async () => { try { await rewardedVideoAd.load(); await rewardedVideoAd.show() } catch (_) { failHintAd() } })
   } catch (_) { failHintAd() }
 }
-function loadRecentItems() { try { return uni.getStorageSync('readEnglishRecent') || [] } catch (_) { return [] } }
-function loadReadingCompletion() { try { const completed = {...(uni.getStorageSync('readEnglishReadingCompletion') || {})}; let migrated = false; for (const item of loadRecentItems()) { let key = ''; if (item.type === 'article' && articles[item.index]) key = 'article:' + articles[item.index].id; if (item.type === 'externalArticle' && externalSeriesData[item.seriesIndex]?.chapters[item.chapterIndex]) key = 'external:' + externalSeriesData[item.seriesIndex].id + ':' + item.chapterIndex; if (key && !completed[key]) { completed[key] = true; migrated = true } } if (migrated) uni.setStorageSync('readEnglishReadingCompletion', completed); return completed } catch (_) { return {} } }
-function loadWordCompletion() { try { return uni.getStorageSync('readEnglishWordCompletion') || {} } catch (_) { return {} } }
-function loadFavoriteWords() { try { const saved = uni.getStorageSync('readEnglishWordFavorites'); return Array.isArray(saved) ? saved : [] } catch (_) { return [] } }
-function loadDailyWordProgress(dayKey) { try { return uni.getStorageSync('readEnglishDailyWordProgress:' + dayKey) || {} } catch (_) { return {} } }
-function loadPuzzleProgress() { try { return uni.getStorageSync('readEnglishPuzzleProgress') || {} } catch (_) { return {} } }
 function syncRecentItems() { recentItems.value = loadRecentItems() }
 function syncReadingCompletion() { readingCompletion.value = loadReadingCompletion() }
 function syncWordCompletion() { wordCompletion.value = loadWordCompletion() }
@@ -290,12 +285,7 @@ function syncDailyWordProgress() { dailyWordProgress.value = loadDailyWordProgre
 function refreshToday() { const nextDay = localDayKey(); if (nextDay !== todayKey.value) { todayKey.value = nextDay; syncDailyWordProgress() } }
 function syncPuzzleProgress() { puzzleProgress.value = loadPuzzleProgress() }
 function trackRecent(type, index, title, subtitle, extra = {}) {
-  const key = extra.seriesIndex !== undefined ? type + ':' + extra.seriesIndex + ':' + extra.chapterIndex : type + ':' + index
-  const item = {key, type, index, title, subtitle, time:Date.now(), ...extra}
-  const ordered = [item, ...recentItems.value.filter(entry => entry.key !== item.key)]
-  const next = ordered
-  recentItems.value = next
-  try { uni.setStorageSync('readEnglishRecent', next); uni.$emit('readEnglishRecentUpdate') } catch (_) {}
+  recentItems.value = saveRecentItem(recentItems.value, type, index, title, subtitle, extra)
 }
 function recentIcon(type) { return ({article:'▤',externalArticle:'▤',word:'Aa',grammar:'文',puzzle:'拼'})[type] || '•' }
 function recentTone(type) { return ({article:'blue',word:'mint',grammar:'lilac',puzzle:'gold'})[type] || 'blue' }
@@ -435,7 +425,7 @@ function startGrammarQuiz() { selectedOption.value = -1; grammarAnswered.value =
 function grammarQuizAction() { if (!grammarAnswered.value) { if (selectedOption.value < 0) { toast('先选择一个答案'); return }; grammarCorrect.value = selectedOption.value === currentGrammar.value.quiz.answer; grammarAnswered.value = true } else { back() } }
 function pickPuzzle(i) { if (usedPuzzle.value.includes(i) || puzzleAnswered.value) return; puzzleWords.value.push(shuffledPuzzle.value[i]); usedPuzzle.value.push(i); puzzleChecked.value = false }
 function unpickPuzzle(i) { if (puzzleAnswered.value) return; const word = puzzleWords.value[i]; puzzleWords.value.splice(i,1); const bankIndex = usedPuzzle.value.find(j => shuffledPuzzle.value[j] === word); if (bankIndex !== undefined) usedPuzzle.value = usedPuzzle.value.filter(j => j !== bankIndex); puzzleChecked.value = false }
-function savePuzzleProgress(setIndex, cursor, completed = false) { const set = puzzleSets[setIndex]; if (!set) return; const nextProgress = {...puzzleProgress.value,[set.id]:{cursor,completed,total:set.items.length,updatedAt:Date.now()}}; puzzleProgress.value = nextProgress; try { uni.setStorageSync('readEnglishPuzzleProgress',nextProgress); uni.$emit('readEnglishPuzzleProgressUpdate') } catch (_) {}; trackRecent('puzzle',setIndex,set.title,set.subtitle + ' · 拼句练习',{puzzleCursor:cursor,puzzleTotal:set.items.length,puzzleCompleted:completed}) }
+function savePuzzleProgress(setIndex, cursor, completed = false) { const set = puzzleSets[setIndex]; if (!set) return; puzzleProgress.value = persistPuzzleProgress(puzzleProgress.value, set, cursor, completed); trackRecent('puzzle',setIndex,set.title,set.subtitle + ' · 拼句练习',{puzzleCursor:cursor,puzzleTotal:set.items.length,puzzleCompleted:completed}) }
 function startPuzzle(i, fromStart = false) { puzzleSetIndex.value = ((i % puzzleSets.length) + puzzleSets.length) % puzzleSets.length; const set = puzzleSets[puzzleSetIndex.value]; try { puzzleProgress.value = uni.getStorageSync('readEnglishPuzzleProgress') || {} } catch (_) {}; const saved = puzzleProgress.value[set.id] || {cursor:0,completed:false}; const cursor = fromStart || saved.completed ? 0 : Math.min(saved.cursor || 0,set.items.length - 1); puzzleIndex.value = cursor; savePuzzleProgress(puzzleSetIndex.value,cursor,false); initPuzzle(); go('puzzleplay') }
 function puzzleAction() { if (puzzleAnswered.value) { if (puzzleIndex.value < currentPuzzleSet.value.items.length - 1) { puzzleIndex.value++; initPuzzle() } else { toast('这组练习完成'); back() }; return }; if (puzzleWords.value.length !== shuffledPuzzle.value.length) { toast('先把所有单词拼完'); return }; puzzleCorrect.value = puzzleWords.value.join(' ') === puzzle.value.answer; puzzleChecked.value = true; if (!puzzleCorrect.value) return; puzzleAnswered.value = true; const nextCursor = puzzleIndex.value + 1; savePuzzleProgress(puzzleSetIndex.value,nextCursor,nextCursor === currentPuzzleSet.value.items.length) }
 function initPuzzle() { shuffledPuzzle.value = puzzle.value.answer.split(' ').sort(() => Math.random() - .5); puzzleWords.value = []; usedPuzzle.value = []; puzzleAnswered.value = false; puzzleChecked.value = false; puzzleCorrect.value = false }
