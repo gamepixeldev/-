@@ -71,7 +71,7 @@
         <view class="vocab-intro"><text class="eyebrow">VOCABULARY</text><text class="large-title">把单词学懂，再记牢</text><text class="muted">释义、词性、例句和拼写练习</text></view>
         <view class="card book-card"><view class="book-row"><view class="book-cover">Aa</view><view class="book-info"><text class="card-title">精选词汇</text><text class="card-sub">独立词汇库　·　{{ allWords.length }} 个词条</text><view class="progress-track"><view class="progress-fill" :style="{width: learnedWordPercent + '%'}"></view></view><text class="card-sub">已学完 {{ learnedWordCount }} 个　·　共 {{ allWords.length }} 个</text></view></view><view class="book-actions"><text @tap="go('wordlist')">浏览全部词汇　›</text><text @tap="beginSpelling('vocab')">拼写练习　›</text></view><button class="primary-button" @tap="openWord(nextWordIndex)">{{ learnedWordCount === allWords.length ? '重新学习' : learnedWordCount ? '继续学习' : '开始学习' }}</button></view>
         <view class="section-head"><text class="section-title">最近学习</text><text class="section-note">点单词查看完整详解</text></view>
-        <view v-if="recentWords.length" class="word-list"><view v-for="item in recentWords" :key="item.key" class="card word-row" @tap="openWord(item.index)"><view><text class="word-main">{{ allWords[item.index].word }}</text><text class="word-sub">{{ allWords[item.index].pos }}　{{ allWords[item.index].meaning }}</text></view><text class="chevron">›</text></view></view>
+        <view v-if="recentWords.length" class="word-list"><view v-for="item in recentWords" :key="item.key" class="card word-row" @tap="openWord(item.index, true)"><view><text class="word-main">{{ allWords[item.index].word }}</text><text class="word-sub">{{ allWords[item.index].pos }}　{{ allWords[item.index].meaning }}</text></view><text class="chevron">›</text></view></view>
         <view v-else class="card word-empty"><text class="card-title">还没有学完的单词</text><text class="card-sub">读完详解并完成拼写，单词就会显示在这里。</text><text class="inline-link" @tap="go('wordlist')">浏览全部词汇　›</text></view>
       </view>
 
@@ -79,7 +79,7 @@
 
       <view v-else-if="view === 'worddetail'" class="page word-detail-page"><view class="word-hero"><text class="eyebrow">WORD {{ wordIndex + 1 }} / {{ allWords.length }}</text><text class="word-display">{{ currentWord.word }}</text><view class="pronounce-row"><text class="pronunciation">{{ currentWord.ipa }}</text></view><view class="word-badges"><text class="tag">{{ currentWord.pos }}</text><text class="tag">{{ currentWord.frequency }}</text><text v-if="isCurrentWordLearned" class="tag learned-tag">✓ 已学完</text></view><text class="meaning">{{ currentWord.meaning }}</text></view>
         <view v-if="currentWordContent.type === 'officialAccount'" class="card source-card"><text class="detail-label">公众号文章</text><text class="card-title">{{ currentWordContent.title || '查看关联的公众号文章' }}</text><text class="card-sub">{{ currentWordContent.summary || '词汇详解内容来自关联的公众号文章。' }}</text><button class="source-button" @tap="openOfficialSource(currentWordContent)">阅读公众号原文</button></view><rich-text v-else class="rich-content card" :nodes="currentWordContent.html" />
-        <view class="bottom-action"><button class="primary-button" @tap="beginSpelling('worddetail')">下一步 · 拼写练习</button></view></view>
+        <view v-if="!wordReadOnly" class="bottom-action"><button class="primary-button" @tap="beginSpelling('worddetail')">下一步 · 拼写练习</button></view></view>
 
       <view v-else-if="view === 'spell'" class="page spell-page"><view class="progress-row"><view class="progress-track"><view class="progress-fill" :style="{width: spellProgressPercent + '%'}"></view></view></view><view class="spell-prompt"><text class="eyebrow">根据中文释义拼出单词</text><text class="spell-meaning">{{ spellWords[spellIndex].pos }}　{{ spellWords[spellIndex].meaning }}</text><text class="hint-link" @tap="requestAnswerHint('spell')">需要提示？</text></view><view class="card spelling-card"><view class="letter-slots"><view v-for="(letter,i) in spellSlots" :key="i" class="letter-slot" :class="{ 'answer-correct': spellChecked && letter === spellWords[spellIndex].word.toLowerCase()[i], 'answer-wrong': spellChecked && letter !== spellWords[spellIndex].word.toLowerCase()[i] }" @tap="removeLetter(i)">{{ letter || '' }}</view></view><view class="letter-bank"><button v-for="(letter,i) in letterBank" :key="i" class="letter-key" :disabled="usedLetters.includes(i) || answered" @tap="addLetter(i)">{{ letter }}</button></view><view v-if="spellChecked" class="explanation" :class="{ 'feedback-wrong': !isCorrect }"><text class="explanation-title">{{ isCorrect ? (spellReturn === 'worddetail' ? '拼写正确，本词已学完！' : '拼写正确！') : '标红的字母位置不对，调整后再试' }}</text><text v-if="isCorrect" class="explanation-text">{{ spellWords[spellIndex].word }}　{{ spellWords[spellIndex].meaning }}</text></view></view><view class="bottom-action"><button class="primary-button" @tap="spellAction">{{ spellActionLabel }}</button></view></view>
 
@@ -116,7 +116,7 @@ import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
 import { articles, externalSeries as externalSeriesData, words, grammar, articleGrammar, puzzleSets as puzzleSetsData, getWordContentSource, getGrammarContentSource } from '../pages/index/learning-data.js'
 import { rewardedAdUnitId } from '../config/rewarded-ad.js'
 
-const props = defineProps({ initialView: { type: String, default: 'home' }, initialIndex: { type: Number, default: 0 }, initialPuzzleIndex: { type: Number, default: 0 }, initialChapter: { type: Number, default: 0 }, initialSource: { type: String, default: 'article' }, initialNote: { type: Number, default: 0 }, sourceArticleIndex: { type: Number, default: -1 }, returnView: { type: String, default: 'vocab' } })
+const props = defineProps({ initialView: { type: String, default: 'home' }, initialIndex: { type: Number, default: 0 }, initialPuzzleIndex: { type: Number, default: 0 }, initialChapter: { type: Number, default: 0 }, initialSource: { type: String, default: 'article' }, initialNote: { type: Number, default: 0 }, sourceArticleIndex: { type: Number, default: -1 }, returnView: { type: String, default: 'vocab' }, wordReadOnly: { type: Boolean, default: false } })
 const view = ref(props.initialView)
 const activeTab = ref(props.initialView)
 const viewStack = ref([])
@@ -130,6 +130,7 @@ const externalSeriesIndex = ref(['externalchapters','externalchapter'].includes(
 const externalChapterIndex = ref(props.initialChapter)
 const showExternalTranslations = ref(true)
 const wordIndex = ref(props.initialIndex)
+const wordReadOnly = ref(props.wordReadOnly)
 const grammarIndex = ref(props.initialIndex)
 const articleGrammarNoteIndex = ref(props.initialNote)
 const sourceArticleIndex = ref(props.sourceArticleIndex)
@@ -272,7 +273,7 @@ function recentSubtitle(item) { if (item.type === 'word') return (wordCompletion
 function puzzleProgressPercent(item) { const total = item.puzzleTotal || (puzzleSets[item.index]?.items.length || 1); return Math.max(0, Math.min(100, item.puzzleCompleted ? 100 : (item.puzzleCursor || 0) / total * 100)) }
 function puzzleProgressFor(set) { const saved = puzzleProgress.value[set.id] || {}; return {cursor:Math.min(saved.cursor || 0,set.items.length),completed:Boolean(saved.completed)} }
 function puzzleSourceLabel(set) { const source = articles.find(article => article.id === set.sourceArticleId); return source ? '来自《' + source.translation + '》' : '独立练习' }
-function openRecent(item) { if (item.type === 'article') openArticle(item.index); else if (item.type === 'externalArticle') openExternalChapter(item.chapterIndex,item.seriesIndex); else if (item.type === 'word') openWord(item.index); else if (item.type === 'grammar') openGrammar(item.index); else if (item.type === 'puzzle') startPuzzle(item.index) }
+function openRecent(item) { if (item.type === 'article') openArticle(item.index); else if (item.type === 'externalArticle') openExternalChapter(item.chapterIndex,item.seriesIndex); else if (item.type === 'word') openWord(item.index, true); else if (item.type === 'grammar') openGrammar(item.index); else if (item.type === 'puzzle') startPuzzle(item.index) }
 function clearRecent() { recentItems.value = []; try { uni.removeStorageSync('readEnglishRecent'); uni.$emit('readEnglishRecentUpdate') } catch (_) {} }
 function selectRecentCategory(category) { recentCategory.value = category; recentPageSize.value = 10; scrollTop.value = 0 }
 function loadMoreRecent() { if (view.value === 'recent' && recentPageSize.value < visibleRecentItems.value.length) recentPageSize.value += 10 }
@@ -293,6 +294,7 @@ function go(next) {
     const externalContext = isExternalReading.value ? '&source=external&series=' + externalSeriesIndex.value + '&chapter=' + externalChapterIndex.value : ''
     let extra = ''
     if (next === 'spell') extra = '&from=' + spellReturn.value + (spellReturn.value === 'articlewordlist' ? '&article=' + articleIndex.value : '') + (isExternalReading.value ? externalContext : '')
+    if (next === 'worddetail' && wordReadOnly.value) extra = '&readonly=1'
     if (next === 'articlegramdetail') extra += '&note=' + articleGrammarNoteIndex.value
     if (next === 'puzzleplay') extra = '&sentence=' + puzzleIndex.value
     const source = isExternalReading.value && ['questions','articlegramlist','articlegramdetail'].includes(next) ? externalContext : ''
@@ -314,7 +316,7 @@ function completeReading() { if (readingCompleted.value) return; const article =
 function backToExternalDirectory() { uni.navigateBack({fail:() => uni.redirectTo({url:'/pages/reading/series?item=' + externalSeriesIndex.value})}) }
 function openArticleWords() { const url = isExternalReading.value ? '/pages/vocab/list?source=external&series=' + externalSeriesIndex.value + '&chapter=' + externalChapterIndex.value : '/pages/vocab/list?article=' + articleIndex.value; uni.navigateTo({url}) }
 function openArticleGrammar(i) { articleGrammarNoteIndex.value = i; go('articlegramdetail') }
-function openWord(i) { wordIndex.value = i; scrollTop.value = 1; nextTick(() => { scrollTop.value = 0 }); go('worddetail') }
+function openWord(i, readOnly = false) { wordIndex.value = i; wordReadOnly.value = readOnly; scrollTop.value = 1; nextTick(() => { scrollTop.value = 0 }); go('worddetail') }
 function completeWordAfterSpelling(word) { if (spellReturn.value !== 'worddetail') return; if (!wordCompletion.value[word.word]) { wordCompletion.value = {...wordCompletion.value,[word.word]:true}; try { uni.setStorageSync('readEnglishWordCompletion',wordCompletion.value); uni.$emit('readEnglishWordCompletionUpdate') } catch (_) {} } trackRecent('word',wordIndex.value,word.word,word.pos + ' ' + word.meaning) }
 function showPuzzleGuide() { uni.showModal({title:'拼句练习',content:'根据中文意思，点选词块组成英文句子。每完成一句会自动保存进度；想重新练习，可在练习列表点击「从头开始」。',showCancel:false,confirmText:'知道了'}) }
 function openGrammar(i) { grammarIndex.value = i; const item = grammarItems[i] || grammarItems[0]; trackRecent('grammar', i, item.title, item.level + ' · 语法专题'); go('gramdetail') }
