@@ -30,7 +30,8 @@ const props = defineProps({
   toast: { type: String, default: '' },
   immersive: { type: Boolean, default: false },
   step: { type: Number, default: 1 },
-  total: { type: Number, default: 1 }
+  total: { type: Number, default: 1 },
+  backAction: { type: Function, default: null }
 })
 defineEmits(['load-more'])
 
@@ -42,5 +43,5 @@ const tabs = [
   {id:'puzzle',label:'拼句',icon:'拼',url:'/pages/puzzle/index'}
 ]
 function openTab(tab) { if (tab.id !== props.activeTab) uni.navigateTo({url:tab.url}) }
-function goBack() { uni.navigateBack({fail:() => uni.redirectTo({url:'/pages/index/index'})}) }
+function goBack() { if (props.backAction) { props.backAction(); return } uni.navigateBack({fail:() => uni.redirectTo({url:'/pages/index/index'})}) }
 </script>
