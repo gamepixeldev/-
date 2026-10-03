@@ -68,16 +68,17 @@
       </view>
 
       <view v-else-if="view === 'vocab'" class="page vocab-page">
-        <view class="vocab-intro"><text class="eyebrow">VOCABULARY</text><text class="large-title">把单词学懂，再记牢</text><text class="muted">释义、词性、例句和拼写练习</text></view>
-        <view class="card book-card"><view class="book-row"><view class="book-cover">Aa</view><view class="book-info"><text class="card-title">精选词汇</text><text class="card-sub">独立词汇库　·　{{ allWords.length }} 个词条</text><view class="progress-track"><view class="progress-fill" :style="{width: learnedWordPercent + '%'}"></view></view><text class="card-sub">已学完 {{ learnedWordCount }} 个　·　共 {{ allWords.length }} 个</text></view></view><view class="book-actions"><text @tap="go('wordlist')">浏览全部词汇　›</text><text @tap="beginSpelling('vocab')">拼写练习　›</text></view><button class="primary-button" @tap="openWord(nextWordIndex)">{{ learnedWordCount === allWords.length ? '重新学习' : learnedWordCount ? '继续学习' : '开始学习' }}</button></view>
+        <view class="vocab-intro"><text class="eyebrow">VOCABULARY</text><text class="large-title">每天几个词，慢慢学扎实</text><text class="muted">今日词单每天更新，学过的词可在记录中重看</text></view>
+        <view class="card today-word-card"><view class="today-card-top"><view><text class="today-label">TODAY'S WORDS</text><text class="today-title">今日单词</text></view><text class="today-date">{{ todayDateLabel }}</text></view><text class="today-description">先读懂词义，再动手拼写</text><view class="today-progress-row"><text>已完成 {{ todayCompletedCount }} / {{ todayWordIndexes.length }}</text><text>{{ todayCompletedCount === todayWordIndexes.length ? '今日已学完' : '明天将更新新词单' }}</text></view><view class="progress-track"><view class="progress-fill" :style="{width: todayProgressPercent + '%'}"></view></view><view class="today-preview"><text v-for="index in todayWordIndexes" :key="index" class="today-chip" :class="{'today-chip-done': isTodayWordDone(index)}">{{ allWords[index].word }}<text v-if="isTodayWordDone(index)"> ✓</text></text></view><button class="primary-button" @tap="openTodayWord">{{ todayCompletedCount === todayWordIndexes.length ? '再学一遍今日单词' : todayCompletedCount ? '继续今日学习' : '开始今日学习' }}</button></view>
+        <view class="card favorite-entry" @tap="openFavoriteWords"><text class="shortcut-symbol shortcut-star">★</text><view class="favorite-entry-copy"><text class="shortcut-title">我的收藏</text><text class="shortcut-meta">已收藏 {{ favoriteWords.length }} 个单词，随时回来看</text></view><text class="shortcut-arrow">›</text></view>
         <view class="section-head"><text class="section-title">最近学习</text><text class="section-note">点单词查看完整详解</text></view>
         <view v-if="recentWords.length" class="word-list"><view v-for="item in recentWords" :key="item.key" class="card word-row" @tap="openWord(item.index, true)"><view><text class="word-main">{{ allWords[item.index].word }}</text><text class="word-sub">{{ allWords[item.index].pos }}　{{ allWords[item.index].meaning }}</text></view><text class="chevron">›</text></view></view>
-        <view v-else class="card word-empty"><text class="card-title">还没有学完的单词</text><text class="card-sub">读完详解并完成拼写，单词就会显示在这里。</text><text class="inline-link" @tap="go('wordlist')">浏览全部词汇　›</text></view>
+        <view v-else class="card word-empty"><text class="card-title">还没有学完的单词</text><text class="card-sub">完成今日单词的拼写后，学习记录会显示在这里。</text><text class="inline-link" @tap="openTodayWord">开始今日学习　›</text></view>
       </view>
 
-      <view v-else-if="view === 'wordlist'" class="page"><view class="intro-block"><text class="eyebrow">WORD LIST</text><text class="large-title">{{ isScopedArticle ? currentArticle.translation + ' · 重点词汇' : '精选词汇' }}</text><text class="muted">{{ isScopedArticle ? '这些词汇选自本文，点击单词查看完整详解' : '独立词库，可按需浏览词条' }}</text></view><view class="word-list"><view v-for="(word,i) in visibleWordList" :key="word.word" class="card word-row" @tap="openWord(allWords.indexOf(word))"><view><text class="word-main">{{ word.word }}</text><text class="word-sub">{{ word.pos }}　{{ word.meaning }}</text></view><text class="chevron">›</text></view></view><view class="bottom-action"><button class="primary-button" @tap="beginSpelling(isScopedArticle ? 'articlewordlist' : 'wordlist')">开始拼写练习</button></view></view>
+      <view v-else-if="view === 'wordlist'" class="page"><view class="intro-block"><text class="eyebrow">{{ isScopedArticle ? 'ARTICLE WORDS' : 'SAVED WORDS' }}</text><text class="large-title">{{ isScopedArticle ? currentArticle.translation + ' · 重点词汇' : '我的收藏' }}</text><text class="muted">{{ isScopedArticle ? '这些生词选自本文，点击查看完整详解' : '点星星收藏的单词都在这里，随时回来看看' }}</text></view><view v-if="visibleWordList.length" class="word-list"><view v-for="word in visibleWordList" :key="word.word" class="card word-row" @tap="openWord(allWords.indexOf(word), true)"><view><text class="word-main">{{ word.word }}</text><text class="word-sub">{{ word.pos }}　{{ word.meaning }}</text></view><text v-if="isFavorite(word.word)" class="row-favorite">★</text><text class="chevron">›</text></view></view><view v-else class="card word-empty"><text class="card-title">还没有收藏单词</text><text class="card-sub">在单词详解页点亮星星，喜欢的单词会出现在这里。</text><text class="inline-link" @tap="back">返回今日单词　›</text></view></view>
 
-      <view v-else-if="view === 'worddetail'" class="page word-detail-page"><view class="word-hero"><text class="eyebrow">WORD {{ wordIndex + 1 }} / {{ allWords.length }}</text><text class="word-display">{{ currentWord.word }}</text><view class="pronounce-row"><text class="pronunciation">{{ currentWord.ipa }}</text></view><view class="word-badges"><text class="tag">{{ currentWord.pos }}</text><text class="tag">{{ currentWord.frequency }}</text><text v-if="isCurrentWordLearned" class="tag learned-tag">✓ 已学完</text></view><text class="meaning">{{ currentWord.meaning }}</text></view>
+      <view v-else-if="view === 'worddetail'" class="page word-detail-page"><view class="word-hero"><view class="word-hero-top"><text class="eyebrow">{{ dailyStudy ? 'TODAY · ' + (todayStudyPosition + 1) + ' / ' + studyWordIndexes.length : 'WORD · ' + (wordIndex + 1) + ' / ' + allWords.length }}</text><text class="favorite-toggle" :class="{active:isFavorite(currentWord.word)}" @tap="toggleFavorite(currentWord.word)">{{ isFavorite(currentWord.word) ? '★' : '☆' }}</text></view><text class="word-display">{{ currentWord.word }}</text><view class="pronounce-row"><text class="pronunciation">{{ currentWord.ipa }}</text></view><view class="word-badges"><text class="tag">{{ currentWord.pos }}</text><text class="tag">{{ currentWord.frequency }}</text><text v-if="isCurrentWordLearned" class="tag learned-tag">✓ 已学完</text></view><text class="meaning">{{ currentWord.meaning }}</text></view>
         <view v-if="currentWordContent.type === 'officialAccount'" class="card source-card"><text class="detail-label">公众号文章</text><text class="card-title">{{ currentWordContent.title || '查看关联的公众号文章' }}</text><text class="card-sub">{{ currentWordContent.summary || '词汇详解内容来自关联的公众号文章。' }}</text><button class="source-button" @tap="openOfficialSource(currentWordContent)">阅读公众号原文</button></view><rich-text v-else class="rich-content card" :nodes="currentWordContent.html" />
       </view>
 
@@ -116,8 +117,9 @@
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
 import { articles, externalSeries as externalSeriesData, words, grammar, articleGrammar, puzzleSets as puzzleSetsData, getWordContentSource, getGrammarContentSource } from '../pages/index/learning-data.js'
 import { rewardedAdUnitId } from '../config/rewarded-ad.js'
+import { dailyWordIndexes, localDayKey } from '../config/daily-words.js'
 
-const props = defineProps({ initialView: { type: String, default: 'home' }, initialIndex: { type: Number, default: 0 }, initialPuzzleIndex: { type: Number, default: 0 }, initialChapter: { type: Number, default: 0 }, initialSource: { type: String, default: 'article' }, initialNote: { type: Number, default: 0 }, sourceArticleIndex: { type: Number, default: -1 }, returnView: { type: String, default: 'vocab' }, wordReadOnly: { type: Boolean, default: false } })
+const props = defineProps({ initialView: { type: String, default: 'home' }, initialIndex: { type: Number, default: 0 }, initialPuzzleIndex: { type: Number, default: 0 }, initialChapter: { type: Number, default: 0 }, initialSource: { type: String, default: 'article' }, initialNote: { type: Number, default: 0 }, sourceArticleIndex: { type: Number, default: -1 }, returnView: { type: String, default: 'vocab' }, wordReadOnly: { type: Boolean, default: false }, initialDailyStudy: { type: Boolean, default: false }, initialStudyDate: { type: String, default: '' } })
 const view = ref(props.initialView)
 const activeTab = ref(props.initialView)
 const viewStack = ref([])
@@ -132,6 +134,9 @@ const externalChapterIndex = ref(props.initialChapter)
 const showExternalTranslations = ref(true)
 const wordIndex = ref(props.initialIndex)
 const wordReadOnly = ref(props.wordReadOnly)
+const dailyStudy = ref(props.initialDailyStudy)
+const todayKey = ref(localDayKey())
+const studyDate = ref(props.initialStudyDate || todayKey.value)
 const grammarIndex = ref(props.initialIndex)
 const articleGrammarNoteIndex = ref(props.initialNote)
 const sourceArticleIndex = ref(props.sourceArticleIndex)
@@ -160,12 +165,18 @@ const tabs = [{id:'home',label:'首页',icon:'⌂'},{id:'reading',label:'精读'
 const recentItems = ref(loadRecentItems())
 const readingCompletion = ref(loadReadingCompletion())
 const wordCompletion = ref(loadWordCompletion())
+const favoriteWordIds = ref(loadFavoriteWords())
+const dailyWordProgress = ref(loadDailyWordProgress(todayKey.value))
 const recentCategory = ref('reading')
 const puzzleProgress = ref(loadPuzzleProgress())
 const allWords = words
-const learnedWordCount = computed(() => allWords.filter(word => wordCompletion.value[word.word]).length)
-const learnedWordPercent = computed(() => allWords.length ? learnedWordCount.value / allWords.length * 100 : 0)
-const nextWordIndex = computed(() => Math.max(0, allWords.findIndex(word => !wordCompletion.value[word.word])))
+const todayWordIndexes = computed(() => dailyWordIndexes(todayKey.value, allWords.length))
+const studyWordIndexes = computed(() => dailyWordIndexes(studyDate.value, allWords.length))
+const todayDateLabel = computed(() => { const [, month, day] = todayKey.value.split('-'); return `${Number(month)}月${Number(day)}日` })
+const todayCompletedCount = computed(() => todayWordIndexes.value.filter(index => dailyWordProgress.value[allWords[index].word]).length)
+const todayProgressPercent = computed(() => todayWordIndexes.value.length ? todayCompletedCount.value / todayWordIndexes.value.length * 100 : 0)
+const favoriteWords = computed(() => allWords.filter(word => favoriteWordIds.value.includes(word.word)))
+const todayStudyPosition = computed(() => studyWordIndexes.value.indexOf(wordIndex.value))
 const recentWords = computed(() => recentItems.value.filter(item => item.type === 'word' && allWords[item.index] && wordCompletion.value[allWords[item.index].word]).slice(0, 5))
 const homeRecentItems = computed(() => recentItems.value.filter(item => item.type !== 'word' || wordCompletion.value[allWords[item.index]?.word]))
 const grammarItems = grammar
@@ -175,14 +186,15 @@ const isScopedArticle = computed(() => isExternalReading.value || sourceArticleI
 const currentArticle = computed(() => isExternalReading.value ? (() => { const chapter = currentExternalChapter.value; const series = currentExternalSeries.value; return {id:'external-' + series.id + '-' + externalChapterIndex.value,title:chapter.title,translation:series.translation,level:series.level,minutes:chapter.minutes,icon:series.icon,theme:series.theme,paragraphs:chapter.paragraphs,translations:chapter.translations,words:chapter.words || [],questions:chapter.questions || [],chapterCount:series.chapters.length} })() : (articles[articleIndex.value] || articles[0]))
 const readingCompletionKey = computed(() => isExternalReading.value ? 'external:' + currentExternalSeries.value.id + ':' + externalChapterIndex.value : 'article:' + currentArticle.value.id)
 const readingCompleted = computed(() => Boolean(readingCompletion.value[readingCompletionKey.value]))
-const visibleWordList = computed(() => isScopedArticle.value ? (currentArticle.value.words || []).map(id => allWords.find(word => word.word === id)).filter(Boolean) : allWords)
+const visibleWordList = computed(() => isScopedArticle.value ? (currentArticle.value.words || []).map(id => allWords.find(word => word.word === id)).filter(Boolean) : favoriteWords.value)
 const articleWordEntries = computed(() => (currentArticle.value.words || []).map(id => allWords.find(word => word.word === id)).filter(Boolean))
 const currentArticleGrammar = computed(() => isExternalReading.value ? (currentExternalChapter.value.grammarNotes || []) : (articleGrammar[currentArticle.value.id] || []))
 const currentArticleGrammarNote = computed(() => currentArticleGrammar.value[articleGrammarNoteIndex.value] || currentArticleGrammar.value[0] || {})
 const articleGrammarContent = computed(() => getGrammarContentSource(currentArticleGrammarNote.value))
 const currentWord = computed(() => allWords[wordIndex.value] || allWords[0])
 const isCurrentWordLearned = computed(() => Boolean(wordCompletion.value[currentWord.value.word]))
-const spellActionLabel = computed(() => !answered.value ? '检查拼写' : spellReturn.value === 'worddetail' ? wordIndex.value < allWords.length - 1 ? '下一个单词' : '完成本轮学习' : spellIndex.value < spellWords.value.length - 1 ? '下一个单词' : '完成练习')
+const spellActionLabel = computed(() => !answered.value ? '检查拼写' : spellReturn.value === 'worddetail' ? nextStudyWordIndex.value >= 0 ? '下一个单词' : dailyStudy.value ? '完成今日学习' : '完成本轮学习' : spellIndex.value < spellWords.value.length - 1 ? '下一个单词' : '完成练习')
+const nextStudyWordIndex = computed(() => dailyStudy.value ? studyWordIndexes.value[todayStudyPosition.value + 1] ?? -1 : wordIndex.value < allWords.length - 1 ? wordIndex.value + 1 : -1)
 const spellProgressPercent = computed(() => spellWords.value.length ? (spellIndex.value + (answered.value && isCorrect.value ? 1 : 0)) / spellWords.value.length * 100 : 0)
 const currentGrammar = computed(() => grammarItems[grammarIndex.value] || grammarItems[0])
 const currentWordContent = computed(() => getWordContentSource(currentWord.value))
@@ -193,7 +205,7 @@ const visibleGrammar = computed(() => grammarFilter.value === '全部' ? grammar
 const externalSeries = externalSeriesData
 const currentExternalSeries = computed(() => externalSeries[externalSeriesIndex.value] || externalSeries[0])
 const currentExternalChapter = computed(() => currentExternalSeries.value.chapters[externalChapterIndex.value] || currentExternalSeries.value.chapters[0])
-const pageTitle = computed(() => ({home:'读句 English',reading:'精读',article:'文章精读',questions:'阅读理解',externalchapters:'小说目录',externalchapter:'章节阅读',vocab:'单词详解',wordlist:isScopedArticle.value ? '本文重点词汇' : '全部词汇',worddetail:'单词详解',spell:'拼写练习',grammar:'语法学习',gramlist:'语法拆解',gramdetail:'语法详解',gramquiz:'语法练习',articlegramlist:'本文语法解析',articlegramdetail:'文章语法解析',puzzle:'拼句练习',puzzleplay:'拼句练习',recent:'最近学习'})[view.value] || '读句 English')
+const pageTitle = computed(() => ({home:'读句 English',reading:'精读',article:'文章精读',questions:'阅读理解',externalchapters:'小说目录',externalchapter:'章节阅读',vocab:'单词详解',wordlist:isScopedArticle.value ? '本文重点词汇' : '我的收藏',worddetail:'单词详解',spell:'拼写练习',grammar:'语法学习',gramlist:'语法拆解',gramdetail:'语法详解',gramquiz:'语法练习',articlegramlist:'本文语法解析',articlegramdetail:'文章语法解析',puzzle:'拼句练习',puzzleplay:'拼句练习',recent:'最近学习'})[view.value] || '读句 English')
 const immersive = computed(() => ['spell','questions','gramquiz'].includes(view.value))
 const practiceIndex = computed(() => view.value === 'spell' ? spellIndex.value : view.value === 'gramquiz' ? 0 : questionIndex.value)
 const practiceTotal = computed(() => view.value === 'spell' ? spellWords.value.length : view.value === 'gramquiz' ? 1 : currentArticle.value.questions.length)
@@ -255,10 +267,15 @@ function showHintAd(hint) {
 function loadRecentItems() { try { return uni.getStorageSync('readEnglishRecent') || [] } catch (_) { return [] } }
 function loadReadingCompletion() { try { const completed = {...(uni.getStorageSync('readEnglishReadingCompletion') || {})}; let migrated = false; for (const item of loadRecentItems()) { let key = ''; if (item.type === 'article' && articles[item.index]) key = 'article:' + articles[item.index].id; if (item.type === 'externalArticle' && externalSeriesData[item.seriesIndex]?.chapters[item.chapterIndex]) key = 'external:' + externalSeriesData[item.seriesIndex].id + ':' + item.chapterIndex; if (key && !completed[key]) { completed[key] = true; migrated = true } } if (migrated) uni.setStorageSync('readEnglishReadingCompletion', completed); return completed } catch (_) { return {} } }
 function loadWordCompletion() { try { return uni.getStorageSync('readEnglishWordCompletion') || {} } catch (_) { return {} } }
+function loadFavoriteWords() { try { const saved = uni.getStorageSync('readEnglishWordFavorites'); return Array.isArray(saved) ? saved : [] } catch (_) { return [] } }
+function loadDailyWordProgress(dayKey) { try { return uni.getStorageSync('readEnglishDailyWordProgress:' + dayKey) || {} } catch (_) { return {} } }
 function loadPuzzleProgress() { try { return uni.getStorageSync('readEnglishPuzzleProgress') || {} } catch (_) { return {} } }
 function syncRecentItems() { recentItems.value = loadRecentItems() }
 function syncReadingCompletion() { readingCompletion.value = loadReadingCompletion() }
 function syncWordCompletion() { wordCompletion.value = loadWordCompletion() }
+function syncFavoriteWords() { favoriteWordIds.value = loadFavoriteWords() }
+function syncDailyWordProgress() { dailyWordProgress.value = loadDailyWordProgress(todayKey.value) }
+function refreshToday() { const nextDay = localDayKey(); if (nextDay !== todayKey.value) { todayKey.value = nextDay; syncDailyWordProgress() } }
 function syncPuzzleProgress() { puzzleProgress.value = loadPuzzleProgress() }
 function trackRecent(type, index, title, subtitle, extra = {}) {
   const key = extra.seriesIndex !== undefined ? type + ':' + extra.seriesIndex + ':' + extra.chapterIndex : type + ':' + index
@@ -294,8 +311,8 @@ function go(next) {
     const item = ['article','questions','articlegramlist','articlegramdetail'].includes(next) ? articleIndex.value : next === 'worddetail' ? wordIndex.value : next === 'spell' ? spellReturn.value === 'articlewordlist' ? articleIndex.value : wordIndex.value : ['gramdetail','gramquiz'].includes(next) ? grammarIndex.value : next === 'puzzleplay' ? puzzleSetIndex.value : 0
     const externalContext = isExternalReading.value ? '&source=external&series=' + externalSeriesIndex.value + '&chapter=' + externalChapterIndex.value : ''
     let extra = ''
-    if (next === 'spell') extra = '&from=' + spellReturn.value + (spellReturn.value === 'articlewordlist' ? '&article=' + articleIndex.value : '') + (isExternalReading.value ? externalContext : '')
-    if (next === 'worddetail' && wordReadOnly.value) extra = '&readonly=1'
+    if (next === 'spell') extra = '&from=' + spellReturn.value + (spellReturn.value === 'articlewordlist' ? '&article=' + articleIndex.value : '') + (isExternalReading.value ? externalContext : '') + (dailyStudy.value && spellReturn.value === 'worddetail' ? '&study=daily&day=' + studyDate.value : '')
+    if (next === 'worddetail') extra = (wordReadOnly.value ? '&readonly=1' : '') + (dailyStudy.value ? '&study=daily&day=' + studyDate.value : '')
     if (next === 'articlegramdetail') extra += '&note=' + articleGrammarNoteIndex.value
     if (next === 'puzzleplay') extra = '&sentence=' + puzzleIndex.value
     const source = isExternalReading.value && ['questions','articlegramlist','articlegramdetail'].includes(next) ? externalContext : ''
@@ -317,8 +334,13 @@ function completeReading() { if (readingCompleted.value) return; const article =
 function backToExternalDirectory() { uni.navigateBack({fail:() => uni.redirectTo({url:'/pages/reading/series?item=' + externalSeriesIndex.value})}) }
 function openArticleWords() { const url = isExternalReading.value ? '/pages/vocab/list?source=external&series=' + externalSeriesIndex.value + '&chapter=' + externalChapterIndex.value : '/pages/vocab/list?article=' + articleIndex.value; uni.navigateTo({url}) }
 function openArticleGrammar(i) { articleGrammarNoteIndex.value = i; go('articlegramdetail') }
-function openWord(i, readOnly = false) { wordIndex.value = i; wordReadOnly.value = readOnly; scrollTop.value = 1; nextTick(() => { scrollTop.value = 0 }); go('worddetail') }
-function completeWordAfterSpelling(word) { if (spellReturn.value !== 'worddetail') return; if (!wordCompletion.value[word.word]) { wordCompletion.value = {...wordCompletion.value,[word.word]:true}; try { uni.setStorageSync('readEnglishWordCompletion',wordCompletion.value); uni.$emit('readEnglishWordCompletionUpdate') } catch (_) {} } trackRecent('word',wordIndex.value,word.word,word.pos + ' ' + word.meaning) }
+function isFavorite(word) { return favoriteWordIds.value.includes(word) }
+function toggleFavorite(word) { favoriteWordIds.value = isFavorite(word) ? favoriteWordIds.value.filter(id => id !== word) : [...favoriteWordIds.value, word]; try { uni.setStorageSync('readEnglishWordFavorites', favoriteWordIds.value); uni.$emit('readEnglishWordFavoritesUpdate') } catch (_) {} }
+function isTodayWordDone(index) { return Boolean(dailyWordProgress.value[allWords[index].word]) }
+function openFavoriteWords() { uni.navigateTo({url:'/pages/vocab/list'}) }
+function openTodayWord() { const index = todayWordIndexes.value.find(index => !isTodayWordDone(index)) ?? todayWordIndexes.value[0]; if (index === undefined) return; studyDate.value = todayKey.value; openWord(index, false, true) }
+function openWord(i, readOnly = false, fromDaily = false) { wordIndex.value = i; wordReadOnly.value = readOnly; dailyStudy.value = fromDaily; scrollTop.value = 1; nextTick(() => { scrollTop.value = 0 }); go('worddetail') }
+function completeWordAfterSpelling(word) { if (spellReturn.value !== 'worddetail') return; if (!wordCompletion.value[word.word]) { wordCompletion.value = {...wordCompletion.value,[word.word]:true}; try { uni.setStorageSync('readEnglishWordCompletion',wordCompletion.value); uni.$emit('readEnglishWordCompletionUpdate') } catch (_) {} } if (dailyStudy.value && studyWordIndexes.value.includes(wordIndex.value)) { const updated = {...loadDailyWordProgress(studyDate.value), [word.word]:true}; try { uni.setStorageSync('readEnglishDailyWordProgress:' + studyDate.value, updated); uni.$emit('readEnglishDailyWordProgressUpdate') } catch (_) {}; if (studyDate.value === todayKey.value) dailyWordProgress.value = updated } trackRecent('word',wordIndex.value,word.word,word.pos + ' ' + word.meaning) }
 function showPuzzleGuide() { uni.showModal({title:'拼句练习',content:'根据中文意思，点选词块组成英文句子。每完成一句会自动保存进度；想重新练习，可在练习列表点击「从头开始」。',showCancel:false,confirmText:'知道了'}) }
 function openGrammar(i) { grammarIndex.value = i; const item = grammarItems[i] || grammarItems[0]; trackRecent('grammar', i, item.title, item.level + ' · 语法专题'); go('gramdetail') }
 function startQuestions() { questionIndex.value = 0; selectedOption.value = -1; answered.value = false; fillAnswer.value = ''; go('questions') }
@@ -350,11 +372,12 @@ function syncNextWord({from, to}) {
   nextTick(() => { scrollTop.value = 0 })
 }
 function advanceToNextWord() {
-  const nextIndex = wordIndex.value + 1
+  const nextIndex = nextStudyWordIndex.value
+  const nextUrl = '/pages/vocab/detail?item=' + nextIndex + (dailyStudy.value ? '&study=daily&day=' + studyDate.value : '')
   const pages = getCurrentPages()
   const previousRoute = (pages[pages.length - 2]?.route || '').replace(/^\//,'')
   if (previousRoute !== 'pages/vocab/detail') {
-    finishWordStep('/pages/vocab/detail?item=' + nextIndex)
+    finishWordStep(nextUrl)
     return
   }
   uni.$emit('readEnglishAdvanceWord', {from:wordIndex.value, to:nextIndex})
@@ -363,11 +386,11 @@ function advanceToNextWord() {
     success:() => {
       // #ifdef H5
       setTimeout(() => {
-        if (window.location.hash.startsWith('#/pages/vocab/detail')) window.history.replaceState(window.history.state, '', window.location.pathname + window.location.search + '#/pages/vocab/detail?item=' + nextIndex)
+        if (window.location.hash.startsWith('#/pages/vocab/detail')) window.history.replaceState(window.history.state, '', window.location.pathname + window.location.search + '#' + nextUrl)
       }, 80)
       // #endif
     },
-    fail:() => uni.redirectTo({url:'/pages/vocab/detail?item=' + nextIndex})
+    fail:() => uni.redirectTo({url:nextUrl})
   })
 }
 function spellAction() {
@@ -380,7 +403,7 @@ function spellAction() {
     return
   }
   if (spellReturn.value === 'worddetail') {
-    if (wordIndex.value < allWords.length - 1) advanceToNextWord()
+    if (nextStudyWordIndex.value >= 0) advanceToNextWord()
     else finishWordStep('')
     return
   }
@@ -400,8 +423,9 @@ function puzzleAction() { if (puzzleAnswered.value) { if (puzzleIndex.value < cu
 function initPuzzle() { shuffledPuzzle.value = puzzle.value.answer.split(' ').sort(() => Math.random() - .5); puzzleWords.value = []; usedPuzzle.value = []; puzzleAnswered.value = false; puzzleChecked.value = false; puzzleCorrect.value = false }
 if (props.initialView === 'spell') setupSpell()
 else initPuzzle()
-onMounted(() => { hintPageActive = true; uni.$on('readEnglishRecentUpdate', syncRecentItems); uni.$on('readEnglishReadingCompletionUpdate', syncReadingCompletion); uni.$on('readEnglishWordCompletionUpdate', syncWordCompletion); uni.$on('readEnglishPuzzleProgressUpdate', syncPuzzleProgress); uni.$on('readEnglishAdvanceWord', syncNextWord) })
-onUnmounted(() => { hintPageActive = false; pendingHint = null; uni.$off('readEnglishRecentUpdate', syncRecentItems); uni.$off('readEnglishReadingCompletionUpdate', syncReadingCompletion); uni.$off('readEnglishWordCompletionUpdate', syncWordCompletion); uni.$off('readEnglishPuzzleProgressUpdate', syncPuzzleProgress); uni.$off('readEnglishAdvanceWord', syncNextWord) })
+let dayRefreshTimer
+onMounted(() => { hintPageActive = true; uni.$on('readEnglishRecentUpdate', syncRecentItems); uni.$on('readEnglishReadingCompletionUpdate', syncReadingCompletion); uni.$on('readEnglishWordCompletionUpdate', syncWordCompletion); uni.$on('readEnglishWordFavoritesUpdate', syncFavoriteWords); uni.$on('readEnglishDailyWordProgressUpdate', syncDailyWordProgress); uni.$on('readEnglishPuzzleProgressUpdate', syncPuzzleProgress); uni.$on('readEnglishAdvanceWord', syncNextWord); dayRefreshTimer = setInterval(refreshToday, 60000) })
+onUnmounted(() => { hintPageActive = false; pendingHint = null; clearInterval(dayRefreshTimer); uni.$off('readEnglishRecentUpdate', syncRecentItems); uni.$off('readEnglishReadingCompletionUpdate', syncReadingCompletion); uni.$off('readEnglishWordCompletionUpdate', syncWordCompletion); uni.$off('readEnglishWordFavoritesUpdate', syncFavoriteWords); uni.$off('readEnglishDailyWordProgressUpdate', syncDailyWordProgress); uni.$off('readEnglishPuzzleProgressUpdate', syncPuzzleProgress); uni.$off('readEnglishAdvanceWord', syncNextWord) })
 </script>
 
 <style>
@@ -502,7 +526,11 @@ page{height:100%;background:#f4f7fc;color:#303d53;font-family:-apple-system,Blin
 .external-theme{background:#fbf1df}.external-theme .status-spacer,.external-theme .topbar{background:#fbf1df}.external-theme .topbar{border-bottom-color:#eadcc6}.external-theme .top-title,.external-theme .back-arrow{color:#713b24}.external-theme .top-action{color:#996243}.external-theme .page-scroll{background:#fbf1df}.external-theme .tabbar{background:#fbf1df;border-top-color:#eadcc6}.external-theme .tab-item.active{color:#8a4a2d}.external-theme .tabs{background:#fbf1df;border-bottom-color:#eadcc6}.external-theme .design-tab{color:#a68e7e}.external-theme .design-tab.on{color:#713b24}.external-theme .design-tab.on:after{background:#b8c86d}.external-theme .eyebrow{color:#a27a5e}.external-theme .muted{color:#9a8172}.external-theme .external-heading,.external-theme .mag-name,.external-theme .series-title,.external-theme .chapter-title,.external-theme .external-chapter-title{color:#713b24}.external-theme .external-author,.external-theme .reading-series-label,.external-theme .chapter-reading-meta text{color:#9b7561}.external-theme .external-book .mag-cover{border-color:#d3b16c;box-shadow:0 9rpx 0 #ead8b7}.external-theme .external-book .mag-cover.theme-blue{background:linear-gradient(155deg,#d9eaff,#f6edda 59%,#abc8df)}.external-theme .external-book .mag-cover.theme-gold{background:linear-gradient(155deg,#f7dfa9,#fff3d9 54%,#e6c576)}.external-theme .cover-kicker{color:#8a5b3d}.external-theme .cover-label{color:#74442d;background:#fff8e8e8}.external-theme .cover-sun{background:#fff2b6}.external-theme .cover-hill.hill-back{background:#a6c7d7}.external-theme .cover-hill.hill-front{background:#789d9b}.external-theme .theme-gold .cover-hill.hill-back{background:#d9bd76}.external-theme .theme-gold .cover-hill.hill-front{background:#92a978}.external-theme .cover-art,.external-theme .directory-cover-icon{color:#713b24}.external-theme .mag-note,.external-theme .series-description,.external-theme .chapter-meta{color:#9a8172}.external-theme .external-book-hero{background:linear-gradient(135deg,#fffdf8,#fff7e9);border-color:#d6b66f}.external-theme .series-overview{border-color:#d4b56e;box-shadow:0 6rpx 0 #eadbbd}.external-theme .series-overview:before{background:#fbf1df;color:#bd855f}.external-theme .directory-cover{border-color:#d1ad61;box-shadow:5rpx 7rpx 0 #ead9b4}.external-theme .directory-heading-mark{color:#713b24}.external-theme .directory-heading-mark:before{background:#f6cf79}.external-theme .chapter-row{border-color:#d5b56e;box-shadow:0 5rpx 0 #eddfc2}.external-theme .chapter-number{color:#713b24}.external-theme .chapter-title{font-size:24rpx}.external-theme .chapter-arrow{border-color:#8c4f31;background:#c3cf78;color:#713b24}.external-theme .chapter-reading-meta text{background:#f7ecdc}.external-theme .translation-toggle{background:#eef1d1;color:#7f512f}.external-theme .reading-progress-fill{background:#b7c86c}.external-theme .external-translation{border-top-color:#e9ddca;color:#9a8172}.external-theme .chapter-navigation{border-top-color:#eadcc6}.external-theme .chapter-navigation .primary-button{background:#c1cc72;color:#713b24;box-shadow:0 6rpx 16rpx #a3a95d35}.external-theme .chapter-navigation .secondary-button{border-color:#d0b16d;color:#713b24;background:#fffaf1}.external-theme .chapter-navigation button[disabled]{opacity:.4}.external-theme .article-page{background:#fff}.external-theme .article-page .large-title{color:#713b24}.external-theme .article-page .paragraph,.external-theme .article-page .sentence{color:#713b24}.external-theme .article-page .translation-line{background:#fbf6ed;color:#9a8172}.external-theme .article-page .reading-completion{border:2rpx solid #dfc88f;box-shadow:0 6rpx 0 #f1e7d0}.external-theme .article-page .primary-button{background:#c1cc72;color:#713b24;box-shadow:0 6rpx 16rpx #a3a95d35}.external-theme .article-page .primary-button.reading-done{background:#9bc5a4}
 @media (max-width: 360px){.hero-title{font-size:39rpx}.module-desc{font-size:17rpx}.article-art{width:136rpx;height:136rpx}}
 .word-empty{display:flex;flex-direction:column;gap:12rpx;padding:30rpx}.word-empty .inline-link{margin-top:8rpx}.home-page .recent-empty{min-height:0;margin:0 30rpx 16rpx;padding:26rpx;align-items:flex-start;text-align:left;box-shadow:0 6rpx 20rpx #263a5d08}
-.home-page{padding-left:0;padding-right:0}.home-page .section-head{padding-left:30rpx;padding-right:30rpx}.vocab-page .book-card{margin:0 0 20rpx}.vocab-page .section-head{padding-left:0;padding-right:0}
+.home-page{padding-left:0;padding-right:0}.home-page .section-head{padding-left:30rpx;padding-right:30rpx}.vocab-page .section-head{padding-left:0;padding-right:0}
 .learned-tag{background:#e5f4ec;color:#398466}
 .letter-slot.answer-correct{color:#238564;border-color:#51bd92;background:#e7f7ee;border-radius:10rpx 10rpx 0 0}.letter-slot.answer-wrong{color:#b93f45;border-color:#e16d74;background:#fff0ef;border-radius:10rpx 10rpx 0 0}.word-token.chosen.answer-correct{color:#238564;background:#dff3e8;box-shadow:inset 0 0 0 2rpx #72cba6}.word-token.chosen.answer-wrong{color:#b93f45;background:#ffeded;box-shadow:inset 0 0 0 2rpx #e99599}.explanation.feedback-wrong{background:#fff0ef}.explanation.feedback-wrong .explanation-title{color:#b84b51}.puzzle-hint{display:block;margin:-12rpx 0 22rpx;text-align:right}
+.today-word-card{display:block;padding:30rpx;background:linear-gradient(135deg,#e4f1ff,#edf8f4 85%);border:2rpx solid #d4e7f6;box-shadow:0 10rpx 26rpx #417dac12}
+.today-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16rpx}.today-card-top>view{display:flex;flex-direction:column;gap:7rpx}.today-label{font-size:17rpx;font-weight:750;letter-spacing:2rpx;color:#6c94bb}.today-title{font-size:37rpx;font-weight:780;color:#304c70}.today-date{padding:9rpx 17rpx;border-radius:19rpx;background:#ffffffbd;color:#64809f;font-size:20rpx;white-space:nowrap}.today-description{display:block;margin:16rpx 0 30rpx;color:#738ba3;font-size:22rpx}.today-progress-row{display:flex;justify-content:space-between;gap:12rpx;margin-bottom:13rpx;font-size:19rpx;color:#66819f}.today-progress-row text:first-child{font-weight:700;color:#3c658e}.today-word-card .progress-track{height:13rpx;background:#d3e3ed}.today-word-card .progress-fill{background:#65bd9b}.today-preview{display:flex;flex-wrap:wrap;gap:10rpx;margin:25rpx 0 30rpx}.today-chip{padding:9rpx 15rpx;border-radius:17rpx;background:#ffffffc9;color:#56708d;font-size:19rpx}.today-chip-done{background:#dcf4e9;color:#3f9373}.today-word-card .primary-button{height:88rpx;line-height:88rpx;font-size:26rpx}
+.favorite-entry{display:flex;align-items:center;gap:20rpx;padding:23rpx 25rpx;border:2rpx solid #e8e2f7;background:#fff}.favorite-entry-copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:7rpx}.shortcut-symbol{width:70rpx;height:70rpx;border-radius:22rpx;display:flex;align-items:center;justify-content:center;font-size:34rpx}.shortcut-star{background:#fff1d7;color:#d49d37}.shortcut-title{font-size:26rpx;font-weight:700;color:#394e6c}.shortcut-meta{font-size:19rpx;color:#8d9aac}.shortcut-arrow{font-size:38rpx;color:#a5afbf}.row-favorite{margin-left:auto;color:#d7a245;font-size:28rpx}
+.word-hero-top{display:flex;align-items:center;justify-content:space-between;gap:18rpx}.favorite-toggle{width:68rpx;height:68rpx;flex:none;display:flex;align-items:center;justify-content:center;border-radius:22rpx;background:#ffffffb8;color:#9ca9ba;font-size:47rpx;line-height:1}.favorite-toggle.active{background:#fff0cb;color:#d49d37}
 </style>
