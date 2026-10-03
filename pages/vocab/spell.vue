@@ -12,6 +12,6 @@ const source = ref('article')
 const chapterIndex = ref(0)
 const dailyStudy = ref(false)
 const studyDate = ref('')
-onLoad(options => { from.value = options.from || 'wordlist'; item.value = Number(from.value === 'worddetail' ? options.item || 0 : options.series || options.item || 0); articleIndex.value = options.article === undefined ? -1 : Number(options.article); seriesIndex.value = options.series === undefined ? -1 : Number(options.series); source.value = options.source || 'article'; chapterIndex.value = Number(options.chapter || 0); dailyStudy.value = options.study === 'daily'; studyDate.value = options.day || ''; ready.value = true })
+onLoad(options => { from.value = options.from || 'wordlist'; item.value = Number(['worddetail','today'].includes(from.value) ? options.item || 0 : options.series || options.item || 0); articleIndex.value = options.article === undefined ? -1 : Number(options.article); seriesIndex.value = options.series === undefined ? -1 : Number(options.series); source.value = options.source || 'article'; chapterIndex.value = Number(options.chapter || 0); dailyStudy.value = options.study === 'daily'; studyDate.value = options.day || ''; ready.value = true })
 </script>
 <style>.route-host{height:100vh}</style>
