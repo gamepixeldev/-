@@ -101,8 +101,8 @@ function checkOrNext() {
   if (spellIndex.value < spellWords.value.length - 1) { spellIndex.value++; setupSpell(); return }
   toast('拼写练习完成')
   const fallback = from.value === 'today' ? '/pages/vocab/index' : from.value === 'articlewordlist' && source.value === 'external' ? '/pages/vocab/list?source=external&series=' + seriesIndex.value + '&chapter=' + chapterIndex.value : from.value === 'articlewordlist' ? '/pages/vocab/list?article=' + articleIndex.value : '/pages/vocab/list'
-  uni.navigateBack({fail:() => uni.redirectTo({url:fallback})})
+  uni.navigateBack({fail:() => fallback === '/pages/vocab/index' ? uni.switchTab({url:fallback}) : uni.redirectTo({url:fallback})})
 }
-function exitSpelling() { if (from.value === 'worddetail') finishWordStudyStep(); else uni.navigateBack({fail:() => uni.redirectTo({url:'/pages/vocab/index'})}) }
+function exitSpelling() { if (from.value === 'worddetail') finishWordStudyStep(); else uni.navigateBack({fail:() => uni.switchTab({url:'/pages/vocab/index'})}) }
 function requestAnswerHint() { const word = currentWord.value.word; request({kind:'spell',answer:word,isCurrent:() => currentWord.value.word === word}) }
 </script>

@@ -25,6 +25,19 @@
 		,{"path":"pages/reading/series","style":{"navigationStyle":"custom","navigationBarTitleText":"小说目录"}}
 		,{"path":"pages/reading/chapter","style":{"navigationStyle":"custom","navigationBarTitleText":"章节阅读"}}
 	],
+	"tabBar": {
+		"color": "#8C98A9",
+		"selectedColor": "#3978EF",
+		"backgroundColor": "#FFFFFF",
+		"borderStyle": "white",
+		"list": [
+			{"pagePath":"pages/index/index","text":"首页","iconPath":"static/tabbar/home-default.png","selectedIconPath":"static/tabbar/home-active.png"},
+			{"pagePath":"pages/reading/index","text":"精读","iconPath":"static/tabbar/reading-default.png","selectedIconPath":"static/tabbar/reading-active.png"},
+			{"pagePath":"pages/grammar/index","text":"语法","iconPath":"static/tabbar/grammar-default.png","selectedIconPath":"static/tabbar/grammar-active.png"},
+			{"pagePath":"pages/vocab/index","text":"单词","iconPath":"static/tabbar/vocab-default.png","selectedIconPath":"static/tabbar/vocab-active.png"},
+			{"pagePath":"pages/puzzle/index","text":"拼句","iconPath":"static/tabbar/puzzle-default.png","selectedIconPath":"static/tabbar/puzzle-active.png"}
+		]
+	},
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
 		"navigationBarTitleText": "uni-app",

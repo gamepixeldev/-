@@ -40,5 +40,5 @@ function subtitle(item) {
 function progressPercent(item) { const total = item.puzzleTotal || (puzzleSets[item.index]?.items.length || 1); return Math.max(0,Math.min(100,item.puzzleCompleted ? 100 : (item.puzzleCursor || 0) / total * 100)) }
 function restartPuzzle(index) { startPuzzleSession(index,true) }
 function clearRecent() { recentItems.value = []; try { uni.removeStorageSync('readEnglishRecent'); uni.$emit('readEnglishRecentUpdate') } catch (_) {} }
-function browseCategory() { const route = ({reading:'/pages/reading/index',grammar:'/pages/grammar/index',word:'/pages/vocab/index',puzzle:'/pages/puzzle/index'})[selectedCategory.value]; uni.navigateTo({url:route}) }
+function browseCategory() { const route = ({reading:'/pages/reading/index',grammar:'/pages/grammar/index',word:'/pages/vocab/index',puzzle:'/pages/puzzle/index'})[selectedCategory.value]; uni.switchTab({url:route}) }
 </script>

@@ -26,5 +26,5 @@ function openWord(index) {
   const query = scope.value.isScoped ? source.value === 'external' ? '&source=external&series=' + seriesIndex.value + '&chapter=' + chapterIndex.value : '&article=' + articleIndex.value : '&readonly=1'
   uni.navigateTo({url:'/pages/vocab/detail?item=' + index + query})
 }
-function back() { uni.navigateBack({fail:() => uni.redirectTo({url:'/pages/vocab/index'})}) }
+function back() { uni.navigateBack({fail:() => uni.switchTab({url:'/pages/vocab/index'})}) }
 </script>

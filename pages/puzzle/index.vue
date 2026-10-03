@@ -1,5 +1,5 @@
 <template>
-  <StudyLayout title="拼句练习" :show-back="false" show-tabs active-tab="puzzle" :scroll-top="scrollTop" @load-more="loadMore">
+  <StudyLayout title="拼句练习" :show-back="false" :scroll-top="scrollTop" @load-more="loadMore">
     <template #action><text @tap="showGuide">ⓘ</text></template>
       <view class="page puzzle-page">
         <view class="hero-home puzzle-home-hero"><view class="eyebrow">SENTENCE PUZZLE</view><text class="puzzle-hero-title">读懂中文，<br/>重新排好英文。</text><view class="hero-book puzzle-book">拼</view></view>

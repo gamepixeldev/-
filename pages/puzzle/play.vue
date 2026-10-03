@@ -65,7 +65,7 @@ function recordProgress(cursor, completed) {
 function checkOrNext() {
   if (answered.value) {
     if (sentenceIndex.value < currentSet.value.items.length - 1) { sentenceIndex.value++; resetSentence() }
-    else { toast('这组练习完成'); uni.navigateBack({fail:() => uni.redirectTo({url:'/pages/puzzle/index'})}) }
+    else { toast('这组练习完成'); uni.navigateBack({fail:() => uni.switchTab({url:'/pages/puzzle/index'})}) }
     return
   }
   if (chosenWords.value.length !== bank.value.length) { toast('先把所有单词拼完'); return }

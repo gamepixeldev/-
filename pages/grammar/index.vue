@@ -1,5 +1,5 @@
 <template>
-  <StudyLayout title="语法学习" :show-back="false" show-tabs active-tab="grammar">
+  <StudyLayout title="语法学习" :show-back="false">
     <view class="page grammar-page">
       <view class="hero-home grammar-home-hero"><view class="eyebrow">GRAMMAR NOTES</view><text class="grammar-hero-title">理解规则，<br/>再把句子说清楚。</text><view class="hero-book grammar-book">文</view></view>
       <view class="filters grammar-filters"><text v-for="filter in ['全部','基础','时态','句型']" :key="filter" class="filter" :class="{on: selectedFilter === filter}" @tap="selectedFilter=filter">{{ filter }}</text></view>

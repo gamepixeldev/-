@@ -1,5 +1,5 @@
 <template>
-  <StudyLayout title="精读" :show-back="false" show-tabs active-tab="reading" :theme-class="shelf === 'mag' ? 'external-theme' : ''">
+  <StudyLayout title="精读" :show-back="false" :theme-class="shelf === 'mag' ? 'external-theme' : ''">
     <view class="page reading-page">
       <view class="tabs"><view class="design-tab" :class="{on:shelf === 'easy'}" @tap="shelf='easy'">轻松阅读</view><view class="design-tab" :class="{on:shelf === 'mag'}" @tap="shelf='mag'">外刊</view></view>
       <view v-if="shelf === 'easy'"><view class="filters"><text v-for="option in ['全部','初级','高级']" :key="option" class="filter" :class="{on:filter === option}" @tap="filter=option">{{ option }}</text></view><view class="article-list"><view v-for="article in filteredArticles" :key="article.id" class="article" @tap="openArticle(articles.indexOf(article))"><view class="art" :class="article.theme"><text>{{ article.icon }}</text></view><view class="article-info"><text class="design-article-title">{{ article.translation }}</text><text class="design-article-desc">{{ article.title }}</text><view class="tags"><text class="tag">原创故事</text><text class="tag">{{ article.level }}</text><text class="tag">{{ storyWordCounts[articles.indexOf(article)] }} 词</text></view></view><text class="arr">›</text></view></view></view>

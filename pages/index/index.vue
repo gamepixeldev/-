@@ -1,5 +1,5 @@
 <template>
-  <StudyLayout title="读句 English" :show-back="false" show-tabs active-tab="home">
+  <StudyLayout title="读句 English" :show-back="false">
     <template #action><text @tap="go('/pages/recent/index')">最近</text></template>
     <view class="page home-page"><view class="hero"><view class="hero-copy"><text class="eyebrow">READ · LEARN · GROW</text><text class="hero-title">把英语，读进生活里</text><text class="hero-sub">从一个故事开始，慢慢读懂英文。</text></view><view class="book-art"><text>读</text><text class="book-mark">READ</text></view><view class="hero-orb"></view></view>
       <view class="section-head"><text class="section-title">学习模块</text></view><view class="module-grid"><view class="module-card module-blue" @tap="go('/pages/reading/index')"><text class="module-icon">▤</text><text class="module-name">精读</text><text class="module-desc">故事 · 词汇 · 阅读理解</text><text class="module-arrow">›</text></view><view class="module-card module-gold" @tap="go('/pages/vocab/index')"><text class="module-icon">Aa</text><text class="module-name">单词详解</text><text class="module-desc">释义 · 例句 · 拼写</text><text class="module-arrow">›</text></view><view class="module-card module-green" @tap="go('/pages/grammar/index')"><text class="module-icon">文</text><text class="module-name">语法学习</text><text class="module-desc">知识讲解 · 随堂练习</text><text class="module-arrow">›</text></view><view class="module-card module-purple" @tap="go('/pages/puzzle/index')"><text class="module-icon">拼</text><text class="module-name">拼句</text><text class="module-desc">理解语意 · 排列句子</text><text class="module-arrow">›</text></view></view>
@@ -20,5 +20,6 @@ const recentItems = ref(loadRecentItems())
 const wordCompletion = ref(loadWordCompletion())
 const homeRecentItems = computed(() => recentItems.value.filter(item => item.type !== 'word' || wordCompletion.value[words[item.index]?.word]))
 onShow(() => { recentItems.value = loadRecentItems(); wordCompletion.value = loadWordCompletion() })
-function go(url) { uni.navigateTo({url}) }
+const tabPaths = new Set(['/pages/reading/index','/pages/grammar/index','/pages/vocab/index','/pages/puzzle/index'])
+function go(url) { if (tabPaths.has(url)) uni.switchTab({url}); else uni.navigateTo({url}) }
 </script>
