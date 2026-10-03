@@ -13,7 +13,7 @@
 		{"path":"pages/puzzle/index","style":{"navigationStyle":"custom","navigationBarTitleText":"拼句练习"}}
 		,{"path":"pages/reading/article","style":{"navigationStyle":"custom","navigationBarTitleText":"文章精读"}}
 		,{"path":"pages/reading/grammar","style":{"navigationStyle":"custom","navigationBarTitleText":"本文语法解析"}}
-		,{"path":"pages/reading/grammar-detail","style":{"navigationStyle":"custom","navigationBarTitleText":"文章语法解析"}}
+		,{"path":"pages/reading/grammar-detail","style":{"navigationStyle":"custom","navigationBarTitleText":"本文语法解析"}}
 		,{"path":"pages/reading/questions","style":{"navigationStyle":"custom","navigationBarTitleText":"阅读理解"}}
 		,{"path":"pages/vocab/list","style":{"navigationStyle":"custom","navigationBarTitleText":"全部词汇"}}
 		,{"path":"pages/vocab/detail","style":{"navigationStyle":"custom","navigationBarTitleText":"单词详解"}}

@@ -108,16 +108,11 @@ export const puzzleSets = [
   ]}
 ]
 
-// Article-specific grammar notes intentionally live separately from the global grammar library.
-export const articleGrammar = {
-  umbrella:[
-    {title:'一般过去时：讲述已经发生的事',summary:'found、carried、handed 描述故事中的过去动作',explanation:'故事讲的是已经发生的事情，所以主要动作使用一般过去时。find 的过去式是不规则变化 found；carry 变过去式时先把 y 改成 i 再加 -ed，成为 carried；handed 则直接加 -ed。',pattern:'主语 + 动词过去式 + 其他',examples:[{en:'Lily found a blue umbrella.',cn:'莉莉发现了一把蓝色雨伞。'},{en:'Lily handed her the umbrella.',cn:'莉莉把雨伞递给了她。'}]},
-    {title:'even though：让步关系',summary:'连接“虽然下雨很冷”与“莉莉感到温暖”',explanation:'even though 引出一个与主句形成反差的事实。本文中雨很冷，但莉莉帮助别人后心里感到温暖。它和 although 意义相近，语气稍强调。',pattern:'主句 + even though + 主语 + 谓语',examples:[{en:'Lily felt warm, even though the rain was cold.',cn:'虽然雨很冷，莉莉心里却感到温暖。'}]}
-  ],
-  seed:[
-    {title:'一般过去时：按顺序叙述故事',summary:'saw、gave、placed、appeared 描写过去发生的动作',explanation:'故事中的种子、嫩芽和花依次出现，叙述已经完成的动作时使用一般过去时。注意 see 的过去式是 saw，give 的过去式是 gave，都是不规则变化。',pattern:'主语 + 动词过去式 + 其他',examples:[{en:'One day, he saw a tiny seed.',cn:'一天，他看到了一颗小种子。'},{en:'Ben gave the seed a little water.',cn:'本给种子浇了一点水。'}]},
-    {title:'when 引导时间状语从句',summary:'交代另一个动作发生的时间',explanation:'when 在句中表示“当……时”。本篇可以用它把照料种子和种子发芽的过程联系起来；叙述过去事件时，主句和从句的动词都要与过去时间保持一致。',pattern:'When + 主语 + 过去式，主语 + 过去式',examples:[{en:'When the shoot appeared, Ben smiled.',cn:'嫩芽出现时，本笑了。'}]}
-  ]
+// One rich-text analysis belongs to each reading item, independent of the grammar module.
+// The article or chapter can later supply grammarContentSource from the admin/API.
+export const articleGrammarContent = {
+  umbrella:{type:'richtext',html:`<h3>故事为什么用过去时？</h3><p>这篇故事在讲 Lily 归还雨伞的经历。发现雨伞、走进面包店、把伞交还女孩，都是已经发生的动作，因此叙述时使用一般过去时。</p><p><strong>Lily found a blue umbrella beside the bus stop.</strong><br/>莉莉在公交站旁发现了一把蓝色雨伞。found 是 find 的过去式。</p><p><strong>She carried the umbrella to the small bakery.</strong><br/>她把雨伞带到小面包店。carry 变为过去式时，将 y 改成 i，再加 -ed。</p><p><strong>Lily handed her the umbrella.</strong><br/>莉莉把雨伞递给了她。handed 是规则变化，直接加 -ed。</p><h3>even though 表达什么关系？</h3><p><strong>Lily felt warm, even though the rain was cold.</strong><br/>虽然雨很冷，莉莉心里却感到温暖。</p><p>even though 引出与主句形成反差的事实：外面很冷，帮助别人后 Lily 却感到温暖。它与 although 意思接近，语气更强调。注意英文中一般不再同时使用 but。</p>`},
+  seed:{type:'richtext',html:`<h3>用过去时串起故事</h3><p>文章按时间顺序写了 Ben 发现种子、照料种子、看到花开放的过程。讲述这些已经发生的动作时，动词要用过去式。</p><p><strong>One day, he saw a tiny seed in a flowerpot.</strong><br/>一天，他在花盆里看到一颗小种子。saw 是 see 的过去式。</p><p><strong>Ben gave the seed a little water and placed the pot in the sun.</strong><br/>本给种子浇了一点水，又把花盆放到阳光下。gave 是 give 的过去式；placed 则是 place 的规则过去式。</p><p><strong>Days passed, and a small green shoot appeared.</strong><br/>几天过去了，一株绿色的小嫩芽冒了出来。passed 和 appeared 都是规则变化。</p><h3>为什么结尾用了现在时？</h3><p><strong>“Good things grow when we care for them,” she said.</strong><br/>“用心照料，美好的事物就会成长。”奶奶说道。</p><p>she said 仍在叙述过去发生的对话；引号里的 grow 和 care 却用一般现在时，因为奶奶说的是一个普遍适用的道理，不只发生在故事里的某一天。when 在这里表示“当……时”。</p>`}
 }
 
 // Word and grammar lessons own their content. An admin/API can replace contentSource
@@ -136,4 +131,14 @@ export function getGrammarContentSource(item) {
   if (item.contentSource) return item.contentSource
   const examples = (item.examples || []).map(example => `<p><strong>${escapeEnglishHTML(example.en)}</strong><br/>${escapeContentHTML(example.cn)}</p>`).join('')
   return {type:'richtext',html:`<h3>什么时候这样用？</h3><p>${escapeContentHTML(item.explanation)}</p><h3>结构拆解</h3><p><strong>${escapeContentHTML(item.pattern)}</strong></p><h3>例句观察</h3>${examples}`}
+}
+
+export function getArticleGrammarContentSource(article, notes = []) {
+  if (article.grammarContentSource) return article.grammarContentSource
+  if (articleGrammarContent[article.id]) return articleGrammarContent[article.id]
+  const sections = notes.map(note => {
+    const examples = (note.examples || []).map(example => `<p><strong>${escapeEnglishHTML(example.en)}</strong><br/>${escapeContentHTML(example.cn)}</p>`).join('')
+    return `<h3>${escapeContentHTML(note.title)}</h3><p>${escapeContentHTML(note.explanation)}</p><p><strong>${escapeContentHTML(note.pattern)}</strong></p>${examples}`
+  }).join('')
+  return {type:'richtext',html:sections || '<p>本篇暂无语法解析。</p>'}
 }

@@ -54,7 +54,7 @@
         <view class="story-banner" :class="currentArticle.theme"><text class="story-emoji">{{ currentArticle.icon }}</text><text class="story-banner-title">{{ currentArticle.title }}</text></view>
         <view class="reading-text"><view v-for="(paragraph, p) in currentArticle.paragraphs" :key="p" class="paragraph"><text v-for="(sentence, s) in paragraph" :key="s" class="sentence">{{ formatEnglish(sentence) }}{{ s < paragraph.length - 1 ? '\u00a0' : '' }}</text><text class="translation-line">{{ currentArticle.translations[p] }}</text></view></view>
         <view class="section-head"><text class="section-title">本文配套学习</text></view>
-        <view class="learning-links"><view class="learning-link" @tap="openArticleWords"><view class="mini-icon gold">Aa</view><view><text class="card-title">本文重点词汇</text><text class="card-sub">{{ articleWordEntries.length }} 个词条</text></view><text class="chevron">›</text></view><view class="learning-link" @tap="go('articlegramlist')"><view class="mini-icon lilac">文</view><view><text class="card-title">本文语法解析</text><text class="card-sub">{{ currentArticleGrammar.length }} 个语法点</text></view><text class="chevron">›</text></view><view class="learning-link" @tap="startQuestions"><view class="mini-icon blue">✓</view><view><text class="card-title">阅读理解</text><text class="card-sub">{{ currentArticle.questions.length }} 道题</text></view><text class="chevron">›</text></view></view>
+        <view class="learning-links"><view class="learning-link" @tap="openArticleWords"><view class="mini-icon gold">Aa</view><view><text class="card-title">本文重点词汇</text><text class="card-sub">{{ articleWordEntries.length }} 个词条</text></view><text class="chevron">›</text></view><view class="learning-link" @tap="go('articlegramdetail')"><view class="mini-icon lilac">文</view><view><text class="card-title">本文语法解析</text></view><text class="chevron">›</text></view><view class="learning-link" @tap="startQuestions"><view class="mini-icon blue">✓</view><view><text class="card-title">阅读理解</text><text class="card-sub">{{ currentArticle.questions.length }} 道题</text></view><text class="chevron">›</text></view></view>
         <view class="reading-completion"><button class="primary-button" :class="{'reading-done':readingCompleted}" @tap="completeReading">{{ readingCompleted ? '✓ 已完成阅读' : '阅读完成' }}</button></view><view class="bottom-spacer"></view>
       </view>
 
@@ -90,9 +90,7 @@
         <view class="grammarlist"><view v-for="(item,i) in visibleGrammar" :key="item.title" class="gramrow" @tap="openGrammar(item.sourceIndex)"><view class="gramicon">{{ ['时','让','时','句'][item.sourceIndex % 4] }}</view><view class="gramrow-copy"><text class="gramrow-title">{{ item.title }}</text><text class="gramrow-sub">{{ item.level }}　·　讲解与练习</text></view><text class="arr">›</text></view></view>
       </view>
 
-      <view v-else-if="view === 'articlegramlist'" class="page"><view class="intro-block"><text class="eyebrow">ARTICLE GRAMMAR</text><text class="large-title">{{ currentArticle.translation }} · 语法解析</text></view><view v-for="(item,i) in currentArticleGrammar" :key="i" class="gramrow" @tap="openArticleGrammar(i)"><view class="gramicon">文</view><view class="gramrow-copy"><text class="gramrow-title">{{ item.title }}</text><text class="gramrow-sub">{{ item.summary }}</text></view><text class="arr">›</text></view></view>
-
-      <view v-else-if="view === 'articlegramdetail'" class="page"><view class="grammar-hero"><text class="eyebrow">ARTICLE GRAMMAR</text><text class="large-title">{{ currentArticleGrammarNote.title }}</text><text class="muted">{{ currentArticleGrammarNote.summary }}</text></view><rich-text class="rich-content card" :nodes="articleGrammarContent.html" /><view class="article-source-note">解析来源：{{ currentArticle.title }}</view></view>
+      <view v-else-if="view === 'articlegramdetail'" class="page"><view class="grammar-hero"><text class="eyebrow">ARTICLE GRAMMAR</text><text class="large-title">{{ isExternalReading ? currentArticle.title : currentArticle.translation }} · 语法解析</text><text class="muted">{{ isExternalReading ? currentExternalSeries.translation + ' · 第 ' + (externalChapterIndex + 1) + ' 章' : currentArticle.title }}</text></view><rich-text class="rich-content card" :nodes="articleGrammarContent.html" /></view>
 
       <view v-else-if="view === 'gramdetail'" class="page"><view class="grammar-hero"><text class="eyebrow">GRAMMAR NOTE</text><text class="large-title">{{ currentGrammar.title }}</text><text class="muted">{{ currentGrammar.summary }}</text></view><view v-if="currentGrammarContent.type === 'officialAccount'" class="card source-card"><text class="detail-label">公众号文章</text><text class="card-title">{{ currentGrammarContent.title || '查看关联的公众号文章' }}</text><text class="card-sub">{{ currentGrammarContent.summary || '语法详解内容来自关联的公众号文章。' }}</text><button class="source-button" @tap="openOfficialSource(currentGrammarContent)">阅读公众号原文</button></view><rich-text v-else class="rich-content card" :nodes="currentGrammarContent.html" /><view class="bottom-action"><button class="primary-button" @tap="startGrammarQuiz">做几道练习</button></view></view>
 
@@ -123,11 +121,11 @@
 
 <script setup>
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
-import { articles, externalSeries as externalSeriesData, words, grammar, articleGrammar, puzzleSets as puzzleSetsData, getWordContentSource, getGrammarContentSource } from '../pages/index/learning-data.js'
+import { articles, externalSeries as externalSeriesData, words, grammar, puzzleSets as puzzleSetsData, getWordContentSource, getGrammarContentSource, getArticleGrammarContentSource } from '../pages/index/learning-data.js'
 import { rewardedAdUnitId } from '../config/rewarded-ad.js'
 import { dailyWordIndexes, localDayKey } from '../config/daily-words.js'
 
-const props = defineProps({ initialView: { type: String, default: 'home' }, initialIndex: { type: Number, default: 0 }, initialPuzzleIndex: { type: Number, default: 0 }, initialChapter: { type: Number, default: 0 }, initialSource: { type: String, default: 'article' }, initialSeriesIndex: { type: Number, default: -1 }, initialNote: { type: Number, default: 0 }, sourceArticleIndex: { type: Number, default: -1 }, returnView: { type: String, default: 'vocab' }, wordReadOnly: { type: Boolean, default: false }, initialDailyStudy: { type: Boolean, default: false }, initialStudyDate: { type: String, default: '' } })
+const props = defineProps({ initialView: { type: String, default: 'home' }, initialIndex: { type: Number, default: 0 }, initialPuzzleIndex: { type: Number, default: 0 }, initialChapter: { type: Number, default: 0 }, initialSource: { type: String, default: 'article' }, initialSeriesIndex: { type: Number, default: -1 }, sourceArticleIndex: { type: Number, default: -1 }, returnView: { type: String, default: 'vocab' }, wordReadOnly: { type: Boolean, default: false }, initialDailyStudy: { type: Boolean, default: false }, initialStudyDate: { type: String, default: '' } })
 const view = ref(props.initialView)
 const activeTab = ref(props.initialView)
 const viewStack = ref([])
@@ -146,7 +144,6 @@ const dailyStudy = ref(props.initialDailyStudy)
 const todayKey = ref(localDayKey())
 const studyDate = ref(props.initialStudyDate || todayKey.value)
 const grammarIndex = ref(props.initialIndex)
-const articleGrammarNoteIndex = ref(props.initialNote)
 const sourceArticleIndex = ref(props.sourceArticleIndex)
 const questionIndex = ref(0)
 const selectedOption = ref(-1)
@@ -191,16 +188,14 @@ const grammarItems = grammar
 const storyWordCounts = [148, 126]
 const isExternalReading = computed(() => readingSource.value === 'external')
 const isScopedArticle = computed(() => isExternalReading.value || sourceArticleIndex.value >= 0)
-const currentArticle = computed(() => isExternalReading.value ? (() => { const chapter = currentExternalChapter.value; const series = currentExternalSeries.value; return {id:'external-' + series.id + '-' + externalChapterIndex.value,title:chapter.title,translation:series.translation,level:series.level,minutes:chapter.minutes,icon:series.icon,theme:series.theme,paragraphs:chapter.paragraphs,translations:chapter.translations,words:chapter.words || [],questions:chapter.questions || [],chapterCount:series.chapters.length} })() : (articles[articleIndex.value] || articles[0]))
+const currentArticle = computed(() => isExternalReading.value ? (() => { const chapter = currentExternalChapter.value; const series = currentExternalSeries.value; return {id:'external-' + series.id + '-' + externalChapterIndex.value,title:chapter.title,translation:series.translation,level:series.level,minutes:chapter.minutes,icon:series.icon,theme:series.theme,paragraphs:chapter.paragraphs,translations:chapter.translations,words:chapter.words || [],questions:chapter.questions || [],grammarContentSource:chapter.grammarContentSource,chapterCount:series.chapters.length} })() : (articles[articleIndex.value] || articles[0]))
 const readingCompletionKey = computed(() => isExternalReading.value ? 'external:' + currentExternalSeries.value.id + ':' + externalChapterIndex.value : 'article:' + currentArticle.value.id)
 const readingCompleted = computed(() => Boolean(readingCompletion.value[readingCompletionKey.value]))
 const visibleWordList = computed(() => isScopedArticle.value ? (currentArticle.value.words || []).map(id => allWords.find(word => word.word === id)).filter(Boolean) : favoriteWords.value)
 const scopedWordIndexes = computed(() => isScopedArticle.value ? visibleWordList.value.map(word => allWords.indexOf(word)) : [])
 const scopedWordPosition = computed(() => scopedWordIndexes.value.indexOf(wordIndex.value))
 const articleWordEntries = computed(() => (currentArticle.value.words || []).map(id => allWords.find(word => word.word === id)).filter(Boolean))
-const currentArticleGrammar = computed(() => isExternalReading.value ? (currentExternalChapter.value.grammarNotes || []) : (articleGrammar[currentArticle.value.id] || []))
-const currentArticleGrammarNote = computed(() => currentArticleGrammar.value[articleGrammarNoteIndex.value] || currentArticleGrammar.value[0] || {})
-const articleGrammarContent = computed(() => getGrammarContentSource(currentArticleGrammarNote.value))
+const articleGrammarContent = computed(() => getArticleGrammarContentSource(currentArticle.value, isExternalReading.value ? currentExternalChapter.value.grammarNotes : []))
 const currentWord = computed(() => allWords[wordIndex.value] || allWords[0])
 const isCurrentWordLearned = computed(() => Boolean(wordCompletion.value[currentWord.value.word]))
 const isCurrentTodayWordDone = computed(() => Boolean((studyDate.value === todayKey.value ? dailyWordProgress.value : loadDailyWordProgress(studyDate.value))[currentWord.value.word]))
@@ -216,7 +211,7 @@ const visibleGrammar = computed(() => grammarFilter.value === '全部' ? grammar
 const externalSeries = externalSeriesData
 const currentExternalSeries = computed(() => externalSeries[externalSeriesIndex.value] || externalSeries[0])
 const currentExternalChapter = computed(() => currentExternalSeries.value.chapters[externalChapterIndex.value] || currentExternalSeries.value.chapters[0])
-const pageTitle = computed(() => ({home:'读句 English',reading:'精读',article:'文章精读',questions:'阅读理解',externalchapters:'小说目录',externalchapter:'章节阅读',vocab:'单词详解',wordlist:isScopedArticle.value ? '本文重点词汇' : '我的收藏',worddetail:'单词详解',spell:'拼写练习',grammar:'语法学习',gramlist:'语法拆解',gramdetail:'语法详解',gramquiz:'语法练习',articlegramlist:'本文语法解析',articlegramdetail:'文章语法解析',puzzle:'拼句练习',puzzleplay:'拼句练习',recent:'最近学习'})[view.value] || '读句 English')
+const pageTitle = computed(() => ({home:'读句 English',reading:'精读',article:'文章精读',questions:'阅读理解',externalchapters:'小说目录',externalchapter:'章节阅读',vocab:'单词详解',wordlist:isScopedArticle.value ? '本文重点词汇' : '我的收藏',worddetail:'单词详解',spell:'拼写练习',grammar:'语法学习',gramlist:'语法拆解',gramdetail:'语法详解',gramquiz:'语法练习',articlegramdetail:'本文语法解析',puzzle:'拼句练习',puzzleplay:'拼句练习',recent:'最近学习'})[view.value] || '读句 English')
 const immersive = computed(() => ['spell','questions','gramquiz'].includes(view.value))
 const practiceIndex = computed(() => view.value === 'spell' ? spellIndex.value : view.value === 'gramquiz' ? 0 : questionIndex.value)
 const practiceTotal = computed(() => view.value === 'spell' ? spellWords.value.length : view.value === 'gramquiz' ? 1 : currentArticle.value.questions.length)
@@ -322,16 +317,15 @@ function wordStudyQuery() {
   return ''
 }
 function go(next) {
-  const routes = {home:'/pages/index/index',reading:'/pages/reading/index',article:'/pages/reading/article',questions:'/pages/reading/questions',vocab:'/pages/vocab/index',wordlist:'/pages/vocab/list',worddetail:'/pages/vocab/detail',spell:'/pages/vocab/spell',grammar:'/pages/grammar/index',gramlist:'/pages/grammar/index',gramdetail:'/pages/grammar/detail',gramquiz:'/pages/grammar/quiz',articlegramlist:'/pages/reading/grammar',articlegramdetail:'/pages/reading/grammar-detail',puzzle:'/pages/puzzle/index',puzzleplay:'/pages/puzzle/play',recent:'/pages/recent/index'}
+  const routes = {home:'/pages/index/index',reading:'/pages/reading/index',article:'/pages/reading/article',questions:'/pages/reading/questions',vocab:'/pages/vocab/index',wordlist:'/pages/vocab/list',worddetail:'/pages/vocab/detail',spell:'/pages/vocab/spell',grammar:'/pages/grammar/index',gramlist:'/pages/grammar/index',gramdetail:'/pages/grammar/detail',gramquiz:'/pages/grammar/quiz',articlegramdetail:'/pages/reading/grammar',puzzle:'/pages/puzzle/index',puzzleplay:'/pages/puzzle/play',recent:'/pages/recent/index'}
   if (routes[next] && next !== props.initialView) {
-    const item = ['article','questions','articlegramlist','articlegramdetail'].includes(next) ? articleIndex.value : next === 'worddetail' ? wordIndex.value : next === 'spell' ? spellReturn.value === 'articlewordlist' ? articleIndex.value : wordIndex.value : ['gramdetail','gramquiz'].includes(next) ? grammarIndex.value : next === 'puzzleplay' ? puzzleSetIndex.value : 0
+    const item = ['article','questions','articlegramdetail'].includes(next) ? articleIndex.value : next === 'worddetail' ? wordIndex.value : next === 'spell' ? spellReturn.value === 'articlewordlist' ? articleIndex.value : wordIndex.value : ['gramdetail','gramquiz'].includes(next) ? grammarIndex.value : next === 'puzzleplay' ? puzzleSetIndex.value : 0
     const externalContext = isExternalReading.value ? '&source=external&series=' + externalSeriesIndex.value + '&chapter=' + externalChapterIndex.value : ''
     let extra = ''
     if (next === 'spell') extra = '&from=' + spellReturn.value + (spellReturn.value === 'worddetail' ? wordStudyQuery() : (spellReturn.value === 'articlewordlist' ? '&article=' + articleIndex.value : '') + (isExternalReading.value ? externalContext : ''))
     if (next === 'worddetail') extra = (wordReadOnly.value ? '&readonly=1' : '') + wordStudyQuery()
-    if (next === 'articlegramdetail') extra += '&note=' + articleGrammarNoteIndex.value
     if (next === 'puzzleplay') extra = '&sentence=' + puzzleIndex.value
-    const source = isExternalReading.value && ['questions','articlegramlist','articlegramdetail'].includes(next) ? externalContext : ''
+    const source = isExternalReading.value && ['questions','articlegramdetail'].includes(next) ? externalContext : ''
     uni.navigateTo({url: routes[next] + '?item=' + item + extra + source})
     return
   }
@@ -349,7 +343,6 @@ function goExternalChapter(i) { if (i < 0 || i >= currentExternalSeries.value.ch
 function completeReading() { if (readingCompleted.value) return; const article = currentArticle.value; readingCompletion.value = {...readingCompletion.value,[readingCompletionKey.value]:true}; try { uni.setStorageSync('readEnglishReadingCompletion', readingCompletion.value); uni.$emit('readEnglishReadingCompletionUpdate') } catch (_) {}; if (isExternalReading.value) trackRecent('externalArticle', externalChapterIndex.value, article.title, currentExternalSeries.value.translation + ' · 外刊阅读', {seriesIndex:externalSeriesIndex.value,chapterIndex:externalChapterIndex.value}); else trackRecent('article', articleIndex.value, article.title, article.translation + ' · 精读文章'); toast('阅读完成，已加入最近学习') }
 function backToExternalDirectory() { uni.navigateBack({fail:() => uni.redirectTo({url:'/pages/reading/series?item=' + externalSeriesIndex.value})}) }
 function openArticleWords() { const url = isExternalReading.value ? '/pages/vocab/list?source=external&series=' + externalSeriesIndex.value + '&chapter=' + externalChapterIndex.value : '/pages/vocab/list?article=' + articleIndex.value; uni.navigateTo({url}) }
-function openArticleGrammar(i) { articleGrammarNoteIndex.value = i; go('articlegramdetail') }
 function isFavorite(word) { return favoriteWordIds.value.includes(word) }
 function toggleFavorite(word) { favoriteWordIds.value = isFavorite(word) ? favoriteWordIds.value.filter(id => id !== word) : [...favoriteWordIds.value, word]; try { uni.setStorageSync('readEnglishWordFavorites', favoriteWordIds.value); uni.$emit('readEnglishWordFavoritesUpdate') } catch (_) {} }
 function isTodayWordDone(index) { return Boolean(dailyWordProgress.value[allWords[index].word]) }
