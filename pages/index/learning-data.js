@@ -105,6 +105,60 @@ export const puzzleSets = [
     {cn:'他发现一张纸条夹在书里。',answer:'He found a note between the pages of the book.'},
     {cn:'奶奶每天给窗台上的植物浇水。',answer:'Grandma waters the plants on the windowsill every day.'},
     {cn:'一个小小的帮助也能让人开心。',answer:'A little help can make someone feel happy.'}
+  ]},
+  {id:'seed-reading',sourceArticleId:'seed',title:'A Seed on the Windowsill',subtitle:'精读文章配套 · 故事句子',icon:'🌱',items:[
+    {cn:'本每天早上上学前都会打开窗户。',answer:'Ben opened the window before school every morning.'},
+    {cn:'他把花盆放在阳光下。',answer:'He placed the pot in the sun.'},
+    {cn:'几天后，一株绿色的小嫩芽出现了。',answer:'A small green shoot appeared after a few days.'},
+    {cn:'本把花展示给了奶奶。',answer:'Ben showed the flower to his grandmother.'}
+  ]},
+  {id:'school-day',title:'校园一天',subtitle:'课堂与课间 · 时间顺序',icon:'✎',items:[
+    {cn:'第一节课八点开始。',answer:'The first lesson begins at eight o’clock.'},
+    {cn:'我们课间在操场上聊天。',answer:'We talk on the playground between classes.'},
+    {cn:'老师让我们一起读这个故事。',answer:'The teacher asked us to read the story together.'},
+    {cn:'放学后，我把作业放进书包。',answer:'After school, I put my homework in my bag.'}
+  ]},
+  {id:'on-the-way',title:'出门路上',subtitle:'出行表达 · 地点方向',icon:'➜',items:[
+    {cn:'我沿着这条街走到图书馆。',answer:'I walked down this street to the library.'},
+    {cn:'公交站就在超市旁边。',answer:'The bus stop is beside the supermarket.'},
+    {cn:'过桥以后向左转。',answer:'Turn left after you cross the bridge.'},
+    {cn:'我们在车站等了十分钟。',answer:'We waited at the station for ten minutes.'}
+  ]},
+  {id:'weekend-plan',title:'周末计划',subtitle:'计划与邀请 · 将来表达',icon:'☀',items:[
+    {cn:'这个周末我打算去看望爷爷。',answer:'I am going to visit my grandfather this weekend.'},
+    {cn:'你愿意和我们一起去公园吗？',answer:'Would you like to go to the park with us?'},
+    {cn:'如果不下雨，我们就骑自行车。',answer:'If it does not rain, we will ride our bikes.'},
+    {cn:'我们可以在午饭前回来。',answer:'We can come back before lunch.'}
+  ]},
+  {id:'kitchen-time',title:'厨房时光',subtitle:'日常动作 · 步骤顺序',icon:'♨',items:[
+    {cn:'妈妈先把苹果洗干净。',answer:'Mom washed the apples first.'},
+    {cn:'请把牛奶倒进这个杯子里。',answer:'Please pour the milk into this cup.'},
+    {cn:'面包在烤箱里烤了十分钟。',answer:'The bread baked in the oven for ten minutes.'},
+    {cn:'晚饭准备好了，我们坐下来一起吃。',answer:'Dinner was ready, and we sat down to eat together.'}
+  ]},
+  {id:'travel-notes',title:'旅行见闻',subtitle:'旅途故事 · 过去时',icon:'✈',items:[
+    {cn:'我们清晨乘火车离开了城市。',answer:'We left the city by train early in the morning.'},
+    {cn:'窗外的山看起来非常近。',answer:'The mountains outside the window looked very close.'},
+    {cn:'导游给我们讲了这座小镇的故事。',answer:'The guide told us a story about the town.'},
+    {cn:'傍晚时，我们拍了许多照片。',answer:'We took many photos in the evening.'}
+  ]},
+  {id:'weather-changes',title:'天气变化',subtitle:'天气描述 · 原因结果',icon:'☁',items:[
+    {cn:'早上阳光明媚，下午却下起了雨。',answer:'It was sunny in the morning, but it rained in the afternoon.'},
+    {cn:'因为风很大，我们关上了窗户。',answer:'We closed the window because the wind was strong.'},
+    {cn:'雨停后，天空中出现了一道彩虹。',answer:'A rainbow appeared in the sky after the rain stopped.'},
+    {cn:'明天可能会比今天冷。',answer:'Tomorrow may be colder than today.'}
+  ]},
+  {id:'reading-habits',title:'阅读习惯',subtitle:'阅读生活 · 频率表达',icon:'▤',items:[
+    {cn:'我睡前通常会读几页书。',answer:'I usually read a few pages before bed.'},
+    {cn:'这本书里的故事让我想到了家。',answer:'The story in this book made me think of home.'},
+    {cn:'遇到生词时，我会先猜它的意思。',answer:'When I see a new word, I guess its meaning first.'},
+    {cn:'她每周都去图书馆借书。',answer:'She borrows books from the library every week.'}
+  ]},
+  {id:'asking-for-help',title:'请求与帮助',subtitle:'礼貌表达 · 生活对话',icon:'♡',items:[
+    {cn:'你能帮我搬一下这个箱子吗？',answer:'Could you help me carry this box?'},
+    {cn:'请告诉我最近的书店在哪里。',answer:'Please tell me where the nearest bookshop is.'},
+    {cn:'谢谢你今天花时间帮助我。',answer:'Thank you for taking the time to help me today.'},
+    {cn:'如果你需要帮助，随时告诉我。',answer:'If you need help, please let me know.'}
   ]}
 ]
 
