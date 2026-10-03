@@ -307,7 +307,7 @@ function go(next) {
   if (['home','reading','vocab','grammar','puzzle'].includes(next)) activeTab.value = next
   scrollTop.value = 0
 }
-function back() { if (viewStack.value.length) { view.value = viewStack.value.pop(); if (['home','reading','vocab','grammar','puzzle'].includes(view.value)) activeTab.value = view.value } else if (props.initialView !== 'home') { uni.navigateBack({ fail: () => uni.redirectTo({url:'/pages/index/index'}) }); return } else { view.value = 'home'; activeTab.value = 'home' }; scrollTop.value = 0 }
+function back() { if (view.value === 'spell' && spellReturn.value === 'worddetail') { finishWordStep(''); return }; if (viewStack.value.length) { view.value = viewStack.value.pop(); if (['home','reading','vocab','grammar','puzzle'].includes(view.value)) activeTab.value = view.value } else if (props.initialView !== 'home') { uni.navigateBack({ fail: () => uni.redirectTo({url:'/pages/index/index'}) }); return } else { view.value = 'home'; activeTab.value = 'home' }; scrollTop.value = 0 }
 function openArticle(i) { articleIndex.value = i; readingSource.value = 'article'; sourceArticleIndex.value = -1; questionIndex.value = 0; go('article') }
 function openExternalSeries(i) { uni.navigateTo({url:'/pages/reading/series?item=' + i}) }
 function openExternalChapter(i, seriesIndex = externalSeriesIndex.value) { uni.navigateTo({url:'/pages/reading/chapter?item=' + seriesIndex + '&chapter=' + i}) }
@@ -342,6 +342,33 @@ function finishWordStep(nextUrl) {
     fail:() => uni.reLaunch({url:fallbackUrl})
   })
 }
+function syncNextWord({from, to}) {
+  if (view.value !== 'worddetail' || wordIndex.value !== from || wordReadOnly.value) return
+  wordIndex.value = to
+  scrollTop.value = 1
+  nextTick(() => { scrollTop.value = 0 })
+}
+function advanceToNextWord() {
+  const nextIndex = wordIndex.value + 1
+  const pages = getCurrentPages()
+  const previousRoute = (pages[pages.length - 2]?.route || '').replace(/^\//,'')
+  if (previousRoute !== 'pages/vocab/detail') {
+    finishWordStep('/pages/vocab/detail?item=' + nextIndex)
+    return
+  }
+  uni.$emit('readEnglishAdvanceWord', {from:wordIndex.value, to:nextIndex})
+  uni.navigateBack({
+    delta:1,
+    success:() => {
+      // #ifdef H5
+      setTimeout(() => {
+        if (window.location.hash.startsWith('#/pages/vocab/detail')) window.history.replaceState(window.history.state, '', window.location.pathname + window.location.search + '#/pages/vocab/detail?item=' + nextIndex)
+      }, 80)
+      // #endif
+    },
+    fail:() => uni.redirectTo({url:'/pages/vocab/detail?item=' + nextIndex})
+  })
+}
 function spellAction() {
   if (!answered.value) {
     if (spellSlots.value.includes('')) { toast('请先填完所有字母'); return }
@@ -352,7 +379,8 @@ function spellAction() {
     return
   }
   if (spellReturn.value === 'worddetail') {
-    finishWordStep(wordIndex.value < allWords.length - 1 ? '/pages/vocab/detail?item=' + (wordIndex.value + 1) : '')
+    if (wordIndex.value < allWords.length - 1) advanceToNextWord()
+    else finishWordStep('')
     return
   }
   if (spellIndex.value < spellWords.value.length - 1) { spellIndex.value++; setupSpell(); return }
@@ -371,8 +399,8 @@ function puzzleAction() { if (puzzleAnswered.value) { if (puzzleIndex.value < cu
 function initPuzzle() { shuffledPuzzle.value = puzzle.value.answer.split(' ').sort(() => Math.random() - .5); puzzleWords.value = []; usedPuzzle.value = []; puzzleAnswered.value = false; puzzleChecked.value = false; puzzleCorrect.value = false }
 if (props.initialView === 'spell') setupSpell()
 else initPuzzle()
-onMounted(() => { hintPageActive = true; uni.$on('readEnglishRecentUpdate', syncRecentItems); uni.$on('readEnglishReadingCompletionUpdate', syncReadingCompletion); uni.$on('readEnglishWordCompletionUpdate', syncWordCompletion); uni.$on('readEnglishPuzzleProgressUpdate', syncPuzzleProgress) })
-onUnmounted(() => { hintPageActive = false; pendingHint = null; uni.$off('readEnglishRecentUpdate', syncRecentItems); uni.$off('readEnglishReadingCompletionUpdate', syncReadingCompletion); uni.$off('readEnglishWordCompletionUpdate', syncWordCompletion); uni.$off('readEnglishPuzzleProgressUpdate', syncPuzzleProgress) })
+onMounted(() => { hintPageActive = true; uni.$on('readEnglishRecentUpdate', syncRecentItems); uni.$on('readEnglishReadingCompletionUpdate', syncReadingCompletion); uni.$on('readEnglishWordCompletionUpdate', syncWordCompletion); uni.$on('readEnglishPuzzleProgressUpdate', syncPuzzleProgress); uni.$on('readEnglishAdvanceWord', syncNextWord) })
+onUnmounted(() => { hintPageActive = false; pendingHint = null; uni.$off('readEnglishRecentUpdate', syncRecentItems); uni.$off('readEnglishReadingCompletionUpdate', syncReadingCompletion); uni.$off('readEnglishWordCompletionUpdate', syncWordCompletion); uni.$off('readEnglishPuzzleProgressUpdate', syncPuzzleProgress); uni.$off('readEnglishAdvanceWord', syncNextWord) })
 </script>
 
 <style>
