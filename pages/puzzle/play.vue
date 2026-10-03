@@ -8,7 +8,8 @@ import { computed, onUnmounted, ref } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
 import StudyLayout from '../../components/StudyLayout.vue'
 import { puzzleSets } from '../index/learning-data.js'
-import { loadPuzzleProgress, loadRecentItems, savePuzzleProgress, saveRecentItem } from '../../services/study-records.js'
+import { loadPuzzleProgress } from '../../services/study-records.js'
+import { recordPuzzleStep } from '../../features/puzzle/puzzle-session.js'
 import { useRewardedHint } from '../../composables/useRewardedHint.js'
 
 const ready = ref(false)
@@ -59,8 +60,7 @@ function unpick(position) {
   checked.value = false
 }
 function recordProgress(cursor, completed) {
-  savePuzzleProgress(loadPuzzleProgress(), currentSet.value, cursor, completed)
-  saveRecentItem(loadRecentItems(), 'puzzle', setIndex.value, currentSet.value.title, currentSet.value.subtitle + ' · 拼句练习', {puzzleCursor:cursor,puzzleTotal:currentSet.value.items.length,puzzleCompleted:completed})
+  recordPuzzleStep(setIndex.value, cursor, completed)
 }
 function checkOrNext() {
   if (answered.value) {

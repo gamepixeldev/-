@@ -16,7 +16,8 @@
 import { computed, nextTick, ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { articles, puzzleSets } from '../index/learning-data.js'
-import { loadPuzzleProgress, loadRecentItems, savePuzzleProgress, saveRecentItem } from '../../services/study-records.js'
+import { loadPuzzleProgress, loadRecentItems } from '../../services/study-records.js'
+import { startPuzzleSession } from '../../features/puzzle/puzzle-session.js'
 import StudyLayout from '../../components/StudyLayout.vue'
 
 const puzzleFilters = [{id:'all',label:'全部'},{id:'independent',label:'独立练习'},{id:'article',label:'精读配套'}]
@@ -42,13 +43,8 @@ function sourceLabel(set) {
 function selectFilter(filter) { puzzleFilter.value = filter; pageSize.value = 6; scrollTop.value = 1; nextTick(() => { scrollTop.value = 0 }) }
 function loadMore() { if (pageSize.value < visiblePuzzleSets.value.length) pageSize.value += 6 }
 function startPuzzle(index, fromStart = false) {
-  const set = puzzleSets[index]
-  if (!set) return
-  const saved = loadPuzzleProgress()[set.id] || {cursor:0,completed:false}
-  const cursor = fromStart || saved.completed ? 0 : Math.min(saved.cursor || 0,set.items.length - 1)
-  progress.value = savePuzzleProgress(loadPuzzleProgress(), set, cursor)
-  recentItems.value = saveRecentItem(loadRecentItems(), 'puzzle', index, set.title, set.subtitle + ' · 拼句练习', {puzzleCursor:cursor,puzzleTotal:set.items.length,puzzleCompleted:false})
-  uni.navigateTo({url:'/pages/puzzle/play?item=' + index + '&sentence=' + cursor})
+  const records = startPuzzleSession(index, fromStart)
+  if (records) { progress.value = records.progress; recentItems.value = records.recent }
 }
 function showGuide() { uni.showModal({title:'拼句练习',content:'根据中文意思，点选词块组成英文句子。每完成一句会自动保存进度；想重新练习，可在练习列表点击「从头开始」。',showCancel:false,confirmText:'知道了'}) }
 </script>
