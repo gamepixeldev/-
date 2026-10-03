@@ -76,9 +76,9 @@
         <view v-else class="card word-empty"><text class="card-title">还没有学完的单词</text><text class="card-sub">完成今日单词的拼写后，学习记录会显示在这里。</text><text class="inline-link" @tap="openTodayWord">开始今日学习　›</text></view>
       </view>
 
-      <view v-else-if="view === 'wordlist'" class="page"><view class="intro-block"><text class="eyebrow">{{ isScopedArticle ? 'ARTICLE WORDS' : 'SAVED WORDS' }}</text><text class="large-title">{{ isScopedArticle ? currentArticle.translation + ' · 重点词汇' : '我的收藏' }}</text><text class="muted">{{ isScopedArticle ? '这些生词选自本文，点击查看完整详解' : '点星星收藏的单词都在这里，随时回来看看' }}</text></view><view v-if="visibleWordList.length" class="word-list"><view v-for="word in visibleWordList" :key="word.word" class="card word-row" @tap="openWord(allWords.indexOf(word), true)"><view><text class="word-main">{{ word.word }}</text><text class="word-sub">{{ word.pos }}　{{ word.meaning }}</text></view><text v-if="isFavorite(word.word)" class="row-favorite">★</text><text class="chevron">›</text></view></view><view v-else class="card word-empty"><text class="card-title">还没有收藏单词</text><text class="card-sub">在单词详解页点亮星星，喜欢的单词会出现在这里。</text><text class="inline-link" @tap="back">返回今日单词　›</text></view></view>
+      <view v-else-if="view === 'wordlist'" class="page"><view class="intro-block"><text class="eyebrow">{{ isScopedArticle ? 'ARTICLE WORDS' : 'SAVED WORDS' }}</text><text class="large-title">{{ isScopedArticle ? currentArticle.translation + ' · 重点词汇' : '我的收藏' }}</text><text class="muted">{{ isScopedArticle ? '读懂词义，再完成拼写；学完后可继续本文下一词' : '点星星收藏的单词都在这里，随时回来看看' }}</text></view><view v-if="visibleWordList.length" class="word-list"><view v-for="word in visibleWordList" :key="word.word" class="card word-row" @tap="openWord(allWords.indexOf(word), !isScopedArticle)"><view><text class="word-main">{{ word.word }}</text><text class="word-sub">{{ word.pos }}　{{ word.meaning }}</text></view><text v-if="wordCompletion[word.word]" class="row-learned">已学完</text><text v-if="isFavorite(word.word)" class="row-favorite">★</text><text class="chevron">›</text></view></view><view v-else class="card word-empty"><text class="card-title">还没有收藏单词</text><text class="card-sub">在单词详解页点亮星星，喜欢的单词会出现在这里。</text><text class="inline-link" @tap="back">返回今日单词　›</text></view></view>
 
-      <view v-else-if="view === 'worddetail'" class="page word-detail-page"><view class="word-hero"><view class="word-hero-top"><text class="eyebrow">{{ dailyStudy ? 'TODAY · ' + (todayStudyPosition + 1) + ' / ' + studyWordIndexes.length : 'WORD · ' + (wordIndex + 1) + ' / ' + allWords.length }}</text><text class="favorite-toggle" :class="{active:isFavorite(currentWord.word)}" @tap="toggleFavorite(currentWord.word)">{{ isFavorite(currentWord.word) ? '★' : '☆' }}</text></view><text class="word-display">{{ currentWord.word }}</text><view class="pronounce-row"><text class="pronunciation">{{ currentWord.ipa }}</text></view><view class="word-badges"><text class="tag">{{ currentWord.pos }}</text><text class="tag">{{ currentWord.frequency }}</text><text v-if="isCurrentWordLearned" class="tag learned-tag">✓ 已学完</text></view><text class="meaning">{{ currentWord.meaning }}</text></view>
+      <view v-else-if="view === 'worddetail'" class="page word-detail-page"><view class="word-hero"><view class="word-hero-top"><text class="eyebrow">{{ dailyStudy ? 'TODAY · ' + (todayStudyPosition + 1) + ' / ' + studyWordIndexes.length : isScopedArticle ? (isExternalReading ? '本章词汇' : '本文词汇') + ' · ' + (scopedWordPosition + 1) + ' / ' + scopedWordIndexes.length : 'WORD · ' + (wordIndex + 1) + ' / ' + allWords.length }}</text><text class="favorite-toggle" :class="{active:isFavorite(currentWord.word)}" @tap="toggleFavorite(currentWord.word)">{{ isFavorite(currentWord.word) ? '★' : '☆' }}</text></view><text class="word-display">{{ currentWord.word }}</text><view class="pronounce-row"><text class="pronunciation">{{ currentWord.ipa }}</text></view><view class="word-badges"><text class="tag">{{ currentWord.pos }}</text><text class="tag">{{ currentWord.frequency }}</text><text v-if="isCurrentWordLearned" class="tag learned-tag">✓ 已学完</text></view><text class="meaning">{{ currentWord.meaning }}</text></view>
         <view v-if="currentWordContent.type === 'officialAccount'" class="card source-card"><text class="detail-label">公众号文章</text><text class="card-title">{{ currentWordContent.title || '查看关联的公众号文章' }}</text><text class="card-sub">{{ currentWordContent.summary || '词汇详解内容来自关联的公众号文章。' }}</text><button class="source-button" @tap="openOfficialSource(currentWordContent)">阅读公众号原文</button></view><rich-text v-else class="rich-content card" :nodes="currentWordContent.html" />
       </view>
 
@@ -119,7 +119,7 @@ import { articles, externalSeries as externalSeriesData, words, grammar, article
 import { rewardedAdUnitId } from '../config/rewarded-ad.js'
 import { dailyWordIndexes, localDayKey } from '../config/daily-words.js'
 
-const props = defineProps({ initialView: { type: String, default: 'home' }, initialIndex: { type: Number, default: 0 }, initialPuzzleIndex: { type: Number, default: 0 }, initialChapter: { type: Number, default: 0 }, initialSource: { type: String, default: 'article' }, initialNote: { type: Number, default: 0 }, sourceArticleIndex: { type: Number, default: -1 }, returnView: { type: String, default: 'vocab' }, wordReadOnly: { type: Boolean, default: false }, initialDailyStudy: { type: Boolean, default: false }, initialStudyDate: { type: String, default: '' } })
+const props = defineProps({ initialView: { type: String, default: 'home' }, initialIndex: { type: Number, default: 0 }, initialPuzzleIndex: { type: Number, default: 0 }, initialChapter: { type: Number, default: 0 }, initialSource: { type: String, default: 'article' }, initialSeriesIndex: { type: Number, default: -1 }, initialNote: { type: Number, default: 0 }, sourceArticleIndex: { type: Number, default: -1 }, returnView: { type: String, default: 'vocab' }, wordReadOnly: { type: Boolean, default: false }, initialDailyStudy: { type: Boolean, default: false }, initialStudyDate: { type: String, default: '' } })
 const view = ref(props.initialView)
 const activeTab = ref(props.initialView)
 const viewStack = ref([])
@@ -127,9 +127,9 @@ const scrollTop = ref(0)
 const readingFilter = ref('全部')
 const readingShelf = ref('easy')
 const grammarFilter = ref('全部')
-const articleIndex = ref(props.initialIndex)
+const articleIndex = ref(props.sourceArticleIndex >= 0 && ['worddetail','spell'].includes(props.initialView) ? props.sourceArticleIndex : props.initialIndex)
 const readingSource = ref(props.initialSource)
-const externalSeriesIndex = ref(['externalchapters','externalchapter'].includes(props.initialView) || props.initialSource === 'external' ? props.initialIndex : 0)
+const externalSeriesIndex = ref(['externalchapters','externalchapter'].includes(props.initialView) || props.initialSource === 'external' ? props.initialSeriesIndex >= 0 ? props.initialSeriesIndex : props.initialIndex : 0)
 const externalChapterIndex = ref(props.initialChapter)
 const showExternalTranslations = ref(true)
 const wordIndex = ref(props.initialIndex)
@@ -187,14 +187,16 @@ const currentArticle = computed(() => isExternalReading.value ? (() => { const c
 const readingCompletionKey = computed(() => isExternalReading.value ? 'external:' + currentExternalSeries.value.id + ':' + externalChapterIndex.value : 'article:' + currentArticle.value.id)
 const readingCompleted = computed(() => Boolean(readingCompletion.value[readingCompletionKey.value]))
 const visibleWordList = computed(() => isScopedArticle.value ? (currentArticle.value.words || []).map(id => allWords.find(word => word.word === id)).filter(Boolean) : favoriteWords.value)
+const scopedWordIndexes = computed(() => isScopedArticle.value ? visibleWordList.value.map(word => allWords.indexOf(word)) : [])
+const scopedWordPosition = computed(() => scopedWordIndexes.value.indexOf(wordIndex.value))
 const articleWordEntries = computed(() => (currentArticle.value.words || []).map(id => allWords.find(word => word.word === id)).filter(Boolean))
 const currentArticleGrammar = computed(() => isExternalReading.value ? (currentExternalChapter.value.grammarNotes || []) : (articleGrammar[currentArticle.value.id] || []))
 const currentArticleGrammarNote = computed(() => currentArticleGrammar.value[articleGrammarNoteIndex.value] || currentArticleGrammar.value[0] || {})
 const articleGrammarContent = computed(() => getGrammarContentSource(currentArticleGrammarNote.value))
 const currentWord = computed(() => allWords[wordIndex.value] || allWords[0])
 const isCurrentWordLearned = computed(() => Boolean(wordCompletion.value[currentWord.value.word]))
-const spellActionLabel = computed(() => !answered.value ? '检查拼写' : spellReturn.value === 'worddetail' ? nextStudyWordIndex.value >= 0 ? '下一个单词' : dailyStudy.value ? '完成今日学习' : '完成本轮学习' : spellIndex.value < spellWords.value.length - 1 ? '下一个单词' : '完成练习')
-const nextStudyWordIndex = computed(() => dailyStudy.value ? studyWordIndexes.value[todayStudyPosition.value + 1] ?? -1 : wordIndex.value < allWords.length - 1 ? wordIndex.value + 1 : -1)
+const spellActionLabel = computed(() => !answered.value ? '检查拼写' : spellReturn.value === 'worddetail' ? nextStudyWordIndex.value >= 0 ? '下一个单词' : dailyStudy.value ? '完成今日学习' : isScopedArticle.value ? isExternalReading.value ? '完成本章词汇' : '完成本文词汇' : '完成本轮学习' : spellIndex.value < spellWords.value.length - 1 ? '下一个单词' : '完成练习')
+const nextStudyWordIndex = computed(() => dailyStudy.value ? studyWordIndexes.value[todayStudyPosition.value + 1] ?? -1 : isScopedArticle.value ? scopedWordIndexes.value[scopedWordPosition.value + 1] ?? -1 : wordIndex.value < allWords.length - 1 ? wordIndex.value + 1 : -1)
 const spellProgressPercent = computed(() => spellWords.value.length ? (spellIndex.value + (answered.value && isCorrect.value ? 1 : 0)) / spellWords.value.length * 100 : 0)
 const currentGrammar = computed(() => grammarItems[grammarIndex.value] || grammarItems[0])
 const currentWordContent = computed(() => getWordContentSource(currentWord.value))
@@ -305,14 +307,20 @@ function openOfficialSource(source) { if (!source.url) { toast('公众号文章�
   window.open(source.url, '_blank', 'noopener')
   // #endif
 }
+function wordStudyQuery() {
+  if (dailyStudy.value) return '&study=daily&day=' + studyDate.value
+  if (isExternalReading.value) return '&source=external&series=' + externalSeriesIndex.value + '&chapter=' + externalChapterIndex.value
+  if (sourceArticleIndex.value >= 0) return '&article=' + sourceArticleIndex.value
+  return ''
+}
 function go(next) {
   const routes = {home:'/pages/index/index',reading:'/pages/reading/index',article:'/pages/reading/article',questions:'/pages/reading/questions',vocab:'/pages/vocab/index',wordlist:'/pages/vocab/list',worddetail:'/pages/vocab/detail',spell:'/pages/vocab/spell',grammar:'/pages/grammar/index',gramlist:'/pages/grammar/index',gramdetail:'/pages/grammar/detail',gramquiz:'/pages/grammar/quiz',articlegramlist:'/pages/reading/grammar',articlegramdetail:'/pages/reading/grammar-detail',puzzle:'/pages/puzzle/index',puzzleplay:'/pages/puzzle/play',recent:'/pages/recent/index'}
   if (routes[next] && next !== props.initialView) {
     const item = ['article','questions','articlegramlist','articlegramdetail'].includes(next) ? articleIndex.value : next === 'worddetail' ? wordIndex.value : next === 'spell' ? spellReturn.value === 'articlewordlist' ? articleIndex.value : wordIndex.value : ['gramdetail','gramquiz'].includes(next) ? grammarIndex.value : next === 'puzzleplay' ? puzzleSetIndex.value : 0
     const externalContext = isExternalReading.value ? '&source=external&series=' + externalSeriesIndex.value + '&chapter=' + externalChapterIndex.value : ''
     let extra = ''
-    if (next === 'spell') extra = '&from=' + spellReturn.value + (spellReturn.value === 'articlewordlist' ? '&article=' + articleIndex.value : '') + (isExternalReading.value ? externalContext : '') + (dailyStudy.value && spellReturn.value === 'worddetail' ? '&study=daily&day=' + studyDate.value : '')
-    if (next === 'worddetail') extra = (wordReadOnly.value ? '&readonly=1' : '') + (dailyStudy.value ? '&study=daily&day=' + studyDate.value : '')
+    if (next === 'spell') extra = '&from=' + spellReturn.value + (spellReturn.value === 'worddetail' ? wordStudyQuery() : (spellReturn.value === 'articlewordlist' ? '&article=' + articleIndex.value : '') + (isExternalReading.value ? externalContext : ''))
+    if (next === 'worddetail') extra = (wordReadOnly.value ? '&readonly=1' : '') + wordStudyQuery()
     if (next === 'articlegramdetail') extra += '&note=' + articleGrammarNoteIndex.value
     if (next === 'puzzleplay') extra = '&sentence=' + puzzleIndex.value
     const source = isExternalReading.value && ['questions','articlegramlist','articlegramdetail'].includes(next) ? externalContext : ''
@@ -373,7 +381,7 @@ function syncNextWord({from, to}) {
 }
 function advanceToNextWord() {
   const nextIndex = nextStudyWordIndex.value
-  const nextUrl = '/pages/vocab/detail?item=' + nextIndex + (dailyStudy.value ? '&study=daily&day=' + studyDate.value : '')
+  const nextUrl = '/pages/vocab/detail?item=' + nextIndex + wordStudyQuery()
   const pages = getCurrentPages()
   const previousRoute = (pages[pages.length - 2]?.route || '').replace(/^\//,'')
   if (previousRoute !== 'pages/vocab/detail') {
@@ -533,4 +541,5 @@ page{height:100%;background:#f4f7fc;color:#303d53;font-family:-apple-system,Blin
 .today-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16rpx}.today-card-top>view{display:flex;flex-direction:column;gap:7rpx}.today-label{font-size:17rpx;font-weight:750;letter-spacing:2rpx;color:#6c94bb}.today-title{font-size:37rpx;font-weight:780;color:#304c70}.today-date{padding:9rpx 17rpx;border-radius:19rpx;background:#ffffffbd;color:#64809f;font-size:20rpx;white-space:nowrap}.today-description{display:block;margin:16rpx 0 30rpx;color:#738ba3;font-size:22rpx}.today-progress-row{display:flex;justify-content:space-between;gap:12rpx;margin-bottom:13rpx;font-size:19rpx;color:#66819f}.today-progress-row text:first-child{font-weight:700;color:#3c658e}.today-word-card .progress-track{height:13rpx;background:#d3e3ed}.today-word-card .progress-fill{background:#65bd9b}.today-preview{display:flex;flex-wrap:wrap;gap:10rpx;margin:25rpx 0 30rpx}.today-chip{padding:9rpx 15rpx;border-radius:17rpx;background:#ffffffc9;color:#56708d;font-size:19rpx}.today-chip-done{background:#dcf4e9;color:#3f9373}.today-word-card .primary-button{height:88rpx;line-height:88rpx;font-size:26rpx}
 .favorite-entry{display:flex;align-items:center;gap:20rpx;padding:23rpx 25rpx;border:2rpx solid #e8e2f7;background:#fff}.favorite-entry-copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:7rpx}.shortcut-symbol{width:70rpx;height:70rpx;border-radius:22rpx;display:flex;align-items:center;justify-content:center;font-size:34rpx}.shortcut-star{background:#fff1d7;color:#d49d37}.shortcut-title{font-size:26rpx;font-weight:700;color:#394e6c}.shortcut-meta{font-size:19rpx;color:#8d9aac}.shortcut-arrow{font-size:38rpx;color:#a5afbf}.row-favorite{margin-left:auto;color:#d7a245;font-size:28rpx}
 .word-hero-top{display:flex;align-items:center;justify-content:space-between;gap:18rpx}.favorite-toggle{width:68rpx;height:68rpx;flex:none;display:flex;align-items:center;justify-content:center;border-radius:22rpx;background:#ffffffb8;color:#9ca9ba;font-size:47rpx;line-height:1}.favorite-toggle.active{background:#fff0cb;color:#d49d37}
+.row-learned{margin-left:auto;padding:5rpx 11rpx;border-radius:13rpx;background:#e5f4ec;color:#398466;font-size:17rpx;white-space:nowrap}
 </style>
