@@ -10,6 +10,7 @@ import StudyLayout from '../../components/StudyLayout.vue'
 import { articles, externalSeries, words } from '../index/learning-data.js'
 import { scopedWords } from '../../features/vocab/word-scope.js'
 import { loadFavoriteWords, loadWordCompletion } from '../../services/study-records.js'
+defineOptions({ inheritAttrs: false })
 const ready = ref(false)
 const articleIndex = ref(-1)
 const source = ref('article')

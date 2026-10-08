@@ -8,6 +8,7 @@ import { computed, onUnmounted, ref } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
 import StudyLayout from '../../components/StudyLayout.vue'
 import { resolveReadingContext } from '../../features/reading/reading-context.js'
+defineOptions({ inheritAttrs: false })
 const ready = ref(false)
 const item = ref(0)
 const chapterIndex = ref(0)

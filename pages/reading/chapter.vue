@@ -3,6 +3,7 @@
 import { ref } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
 import ReadingArticlePage from '../../components/ReadingArticlePage.vue'
+defineOptions({ inheritAttrs: false })
 const ready = ref(false)
 const seriesIndex = ref(0)
 const chapterIndex = ref(0)

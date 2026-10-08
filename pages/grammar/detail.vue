@@ -9,6 +9,7 @@ import { onLoad } from '@dcloudio/uni-app'
 import StudyLayout from '../../components/StudyLayout.vue'
 import { grammar, getGrammarContentSource } from '../index/learning-data.js'
 import { openOfficialArticle } from '../../utils/open-official-article.js'
+defineOptions({ inheritAttrs: false })
 const ready = ref(false)
 const item = ref(0)
 const currentGrammar = computed(() => grammar[item.value] || grammar[0])

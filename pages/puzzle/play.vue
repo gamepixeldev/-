@@ -11,6 +11,7 @@ import { puzzleSets } from '../index/learning-data.js'
 import { loadPuzzleProgress } from '../../services/study-records.js'
 import { recordPuzzleStep } from '../../features/puzzle/puzzle-session.js'
 import { useRewardedHint } from '../../composables/useRewardedHint.js'
+defineOptions({ inheritAttrs: false })
 
 const ready = ref(false)
 const setIndex = ref(0)

@@ -8,6 +8,7 @@ import { computed, ref } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
 import StudyLayout from '../../components/StudyLayout.vue'
 import { externalSeries } from '../index/learning-data.js'
+defineOptions({ inheritAttrs: false })
 const ready = ref(false)
 const seriesIndex = ref(0)
 const series = computed(() => externalSeries[seriesIndex.value] || externalSeries[0])

@@ -13,6 +13,7 @@ import { localDayKey } from '../../config/daily-words.js'
 import { scopedWords, studyWordIndexes, wordStudyQuery } from '../../features/vocab/word-scope.js'
 import { loadDailyWordProgress, loadFavoriteWords, loadWordCompletion } from '../../services/study-records.js'
 import { openOfficialArticle } from '../../utils/open-official-article.js'
+defineOptions({ inheritAttrs: false })
 const ready = ref(false)
 const item = ref(0)
 const readOnly = ref(false)

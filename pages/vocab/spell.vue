@@ -13,6 +13,7 @@ import { scopedWords, nextWordIndex, studyWordIndexes, wordStudyQuery } from '..
 import { finishWordStudyStep, advanceWordStudy } from '../../features/vocab/word-navigation.js'
 import { loadDailyWordProgress, loadRecentItems, loadWordCompletion, saveRecentItem } from '../../services/study-records.js'
 import { useRewardedHint } from '../../composables/useRewardedHint.js'
+defineOptions({ inheritAttrs: false })
 const ready = ref(false)
 const item = ref(0)
 const from = ref('wordlist')
