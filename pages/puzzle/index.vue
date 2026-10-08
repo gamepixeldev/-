@@ -7,7 +7,7 @@
         <view class="section-head puzzle-list-head"><text class="section-title">拼句练习</text><text class="section-note">{{ visiblePuzzleSets.length }} 篇</text></view>
         <view class="puzzle-filters"><text v-for="filter in puzzleFilters" :key="filter.id" class="puzzle-filter" :class="{on:puzzleFilter === filter.id}" @tap="selectFilter(filter.id)">{{ filter.label }}</text></view>
         <view v-for="set in pagedPuzzleSets" :key="set.id" class="card puzzle-source-card"><view class="puzzle-source" @tap="startPuzzle(set.setIndex)"><view class="thumb puzzle-thumb">{{ set.icon }}</view><view class="puzzle-source-copy"><text class="card-title">{{ set.title }}</text><text class="card-sub">{{ set.sourceArticleId ? sourceLabel(set) : set.subtitle }}　·　{{ set.items.length }} 句</text><text v-if="progressFor(set).cursor || progressFor(set).completed" class="puzzle-set-status">{{ progressFor(set).completed ? '已完成' : '已完成 ' + progressFor(set).cursor + ' / ' + set.items.length + ' 句' }}</text></view><text class="arr">›</text></view><view v-if="progressFor(set).cursor || progressFor(set).completed" class="puzzle-card-bottom"><view class="puzzle-card-track"><view :style="{width: (progressFor(set).completed ? 100 : progressFor(set).cursor / set.items.length * 100) + '%'}"></view></view><text class="puzzle-set-restart" @tap.stop="startPuzzle(set.setIndex,true)">从头开始</text></view></view>
-        <view v-if="pagedPuzzleSets.length < visiblePuzzleSets.length" class="puzzle-load-state">下滑加载更多</view>
+        <view v-if="pagedPuzzleSets.length < visiblePuzzleSets.length" class="puzzle-load-state" @tap="loadMore">加载更多　›</view>
       </view>
   </StudyLayout>
 </template>

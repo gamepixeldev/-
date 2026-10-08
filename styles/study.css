@@ -139,5 +139,5 @@ page{height:100%;background:#f4f7fc;color:#303d53;font-family:-apple-system,Blin
 /* uni-page-body already excludes the native tabBar on tab pages. */
 .app-shell{height:100%}
 
-/* Keep the hero's top margin inside the grammar page, without creating phantom scroll. */
-.grammar-page{display:flex;flex-direction:column;min-height:100%}
+/* Keep hero top margins inside short tab pages, without creating phantom scroll. */
+.grammar-page,.puzzle-page{display:flex;flex-direction:column;min-height:100%}
